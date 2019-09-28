@@ -16,6 +16,6 @@
 //     .join("");
 // }
 
-function toCamelCase(str, start = 0) {
+function toCamelCase(str: string, start = 0): string {
   return str.replace(/-(\w)/g, (match, matchItem) => matchItem.toUpperCase())
 }

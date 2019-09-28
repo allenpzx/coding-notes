@@ -1,8 +1,8 @@
-function partition(s) {
+function partition(s: string): string[] {
   const res = [],
     arr = [];
 
-  function isPalindrome(i, j) {
+  function isPalindrome(i: number, j: number) {
     for (; i < j; ) {
       if (s[i] !== s[j]) {
         return false;
@@ -13,7 +13,7 @@ function partition(s) {
     return true;
   }
 
-  function loop(left, right) {
+  function loop(left: number, right: number) {
     if (left === s.length) {
       return res.push(arr.slice());
     }
