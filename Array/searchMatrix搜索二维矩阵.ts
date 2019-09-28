@@ -3,7 +3,7 @@
  * @param {number} target
  * @return {boolean}
  */
-var searchMatrix = function(matrix, target) {
+var searchMatrix = function(matrix: [][], target: number) {
     let row = matrix.length;
     if(row === 0) return false
     let col = matrix.slice(-1)[0].length;
