@@ -1,0 +1,59 @@
+// $bodyMinHeight: calc(100vh - 80px - 168px - 18px);
+
+.container {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainStyle {
+  // min-height: $bodyMinHeight;
+  // flex: 1 0 auto;
+  flex: 1;
+  min-width: 1200px;
+  position: relative;
+  width: 100vw;
+  padding: 16px calc((100vw - 1200px) * 0.5) 32px calc((100vw - 1200px) * 0.5);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+  background-color: #f6f8f9;
+}
+
+:global {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
+// :global {
+// html, body {
+//   ::-webkit-scrollbar {
+//     width: 6px;
+//     height: 6px;
+//   }
+
+//   ::-webkit-scrollbar-track {
+//     border-radius: 3px;
+//     // background: rgba(0, 0, 0, 0.06);
+//     background: yellow;
+//     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.08);
+//   }
+
+//   ::-webkit-scrollbar-thumb {
+//     border-radius: 3px;
+//     // background: rgba(0, 0, 0, 0.12);
+//     background: red;
+//     -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+//   }
+
+//   ::-webkit-horizontal {
+//     display: none;
+//   }
+// }
+// }

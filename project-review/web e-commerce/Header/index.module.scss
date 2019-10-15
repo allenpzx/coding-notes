@@ -1,0 +1,290 @@
+@import '../../assets/style/config.scss';
+$mainColor: #37bef1;
+$textColor: #ffffff;
+$bgColor: #002344;
+$commonHeight: 80px;
+$mainLeft: calc((100% - 1200px) * 0.5);
+
+.cursor {
+  cursor: pointer;
+}
+
+@mixin common_right {
+  @include fontSFPro();
+  font-size: 14px;
+  color: #ffffff;
+  padding: 0 20px;
+  display: flex !important;
+  justify-content: flex-end;
+  align-items: center;
+  &:hover {
+    color: #31c2fa;
+  }
+
+  .prefix {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .tag {
+    padding: 0 20px;
+  }
+}
+
+.container {
+  width: 100vw;
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+
+  // 一级导航区域
+  .main {
+    background-color: $bgColor;
+    align-items: center;
+    height: $commonHeight;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding-left: $mainLeft;
+  }
+
+  .logoWrap {
+    position: relative;
+    // border: 1px solid red;
+    box-sizing: border-box;
+    width: 136px;
+    height: 30px;
+    margin-right: 120px;
+  }
+
+  .logo {
+    width: 136px;
+    height: 30px;
+    display: inline-block;
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 20px;
+    @include fontSFPro();
+    color: #ffffff;
+  }
+
+  .menuItem {
+    height: $commonHeight;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 2rem;
+    @extend .cursor;
+
+    &:hover {
+      color: $mainColor;
+    }
+
+    // &:hover:after {
+    //   content: "";
+    //   position: absolute;
+    //   bottom: 0;
+    //   width: 0px;
+    //   height: 0px;
+    //   border-left: 5px solid transparent;
+    //   border-right: 5px solid transparent;
+    //   border-bottom: 5px solid #1f3b59;
+    // }
+
+    span {
+      padding: 0 8.5px 0 8px;
+    }
+
+    .itemPre {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+
+      svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .itemNex {
+      width: 16px;
+      height: 16px;
+      position: relative;
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+  }
+
+  .menuItemActive:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0px;
+    height: 0px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #1f3b59;
+  }
+
+  // 右侧提醒，订单中心，用户头像区域
+  .userInfo {
+    color: $textColor;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 14px;
+    @include fontSFPro();
+    color: $textColor;
+    position: absolute;
+    right: 40px;
+    height: 80px;
+
+    .pl32 {
+      padding-left: 32px;
+    }
+
+    .userInfoItem {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      @extend .cursor;
+      position: relative;
+      height: 80px;
+
+      &:hover {
+        color: #3acdfe;
+      }
+
+      .hackDot {
+        sup {
+          box-shadow: none;
+        }
+      }
+
+      .tag {
+        padding-left: 4px;
+      }
+    }
+
+    .userName {
+      margin: 0 5px;
+      position: relative;
+      white-space: nowrap;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 5px;
+      line-height: 1.5;
+    }
+
+    .userInfoRightIcon {
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .userInfoRightIconHover {
+      font-size: 14px;
+      display: none;
+    }
+
+    .hackToggle {
+      &:hover .userInfoRightIcon {
+        display: none;
+      }
+
+      &:hover .userInfoRightIconHover {
+        display: inline-block;
+      }
+    }
+  }
+
+  // 二级菜单
+  .subMenu {
+    border-top: 1px solid #1f3b59;
+    background-color: $bgColor;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: absolute;
+    bottom: -45px;
+    width: 100vw;
+    height: 45px;
+    color: white;
+    background-color: $bgColor;
+    z-index: 999;
+    opacity: 0;
+    transform: scale(0, 0);
+    transition-delay: 0.1s; // 防止过快消失
+
+    span {
+      padding: 0 1rem;
+      margin-right: 1rem;
+      &:hover {
+        color: $mainColor;
+      }
+    }
+
+    .subMenuItem {
+      height: 100%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      @extend .cursor;
+    }
+  }
+
+  .subMenu1 {
+    opacity: 1;
+    transform: scale(1, 1);
+    padding-left: calc(((100% - 1200px) * 0.5) + 200px);
+  }
+  .subMenu2 {
+    opacity: 1;
+    transform: scale(1, 1);
+    padding-left: calc(((100% - 1200px) * 0.5) + 280px);
+  }
+}
+
+.active {
+  color: $mainColor;
+}
+
+.logout {
+  padding: 4px 10px;
+  &:active,
+  &:hover {
+    color: $mainColor;
+  }
+  color: $mainColor;
+}
+
+// 内容区域
+:export {
+  width: 100vw;
+  position: relative;
+  paddingLeft: $mainLeft;
+  paddingRight: $mainLeft;
+}

@@ -1,0 +1,84 @@
+@import '../../assets/style/config.scss';
+
+@mixin hackItem() {
+  li,
+  a {
+    color: $blue;
+  }
+  border-color: $blue;
+}
+
+@mixin cantSelect() {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Chrome/Safari/Opera */
+  -khtml-user-select: none; /* Konqueror */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+}
+
+.pagination {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  :global {
+    .ant-pagination-item {
+      border-radius: 0;
+      min-width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: #8a9199;
+
+      @include cantSelect();
+
+      &:focus,
+      &:hover,
+      &-active {
+        @include hackItem();
+      }
+    }
+  }
+}
+
+.btn {
+  @include fontSFPro();
+  box-sizing: border-box;
+  border: solid 1px #ebebeb;
+  background-color: #ffffff;
+  height: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #8a9199;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  @include cantSelect();
+}
+
+.btnl {
+  @extend .btn;
+  width: 73px;
+}
+
+.btnr {
+  @extend .btn;
+  width: 62px;
+}
+
+.block {
+  color: #cccccc;
+}
+
+.loading {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
+}

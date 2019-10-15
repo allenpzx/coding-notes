@@ -1,0 +1,117 @@
+@import '../../assets/style/config.scss';
+$mainLeft: calc((100% - 1200px) * 0.5);
+$qrcode_ios: '../../assets/img/qrcode_ios.png';
+$qrcode_android: '../../assets/img/qrcode_android.png';
+
+@mixin item {
+  cursor: pointer;
+  &:hover {
+    color: #3acdfe;
+  }
+}
+
+.qrset {
+  content: '';
+  position: absolute;
+  z-index: 999;
+  top: 56px;
+  right: 0;
+  @include flexCenter();
+  width: 100px;
+  height: 100px;
+  background-size: 100px 100px;
+}
+
+.footer {
+  width: 100vw;
+  height: 186px;
+  position: relative;
+  background-color: #00274d;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-left: $mainLeft;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex: 0 0 auto;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    font-size: 14px;
+    @include fontSFPro();
+    line-height: 1.5;
+    color: #ffffff;
+
+    b {
+      // @include item();
+      margin: 24px 0;
+      height: 25px;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.56;
+      @include fontSFPro();
+      color: #ffffff;
+    }
+    span {
+      @include item();
+      padding-bottom: 12px;
+      opacity: 0.75;
+
+      a {
+        appearance: none;
+        @include item();
+        color: #fff;
+      }
+    }
+  }
+
+  .col1 {
+    margin-right: 72px;
+  }
+
+  .col3 {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    height: 100%;
+    position: absolute;
+    right: $mainLeft;
+
+    .qrIcon {
+      width: 44px;
+      height: 44px;
+      @include flexCenter();
+      margin-bottom: 8px;
+      border-radius: 4px;
+      background-color: #ffffff;
+      color: black;
+
+      svg {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
+    .qrcodeItem {
+      @include flexCenter();
+      padding-top: 59px;
+      position: relative;
+
+      &:nth-child(2) {
+        padding-left: 30px;
+      }
+
+      &:nth-child(1):hover:after {
+        @extend .qrset;
+        background-image: url($qrcode_ios);
+      }
+      &:nth-child(2):hover:after {
+        @extend .qrset;
+        background-image: url($qrcode_android);
+      }
+    }
+  }
+}

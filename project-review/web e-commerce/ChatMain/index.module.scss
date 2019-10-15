@@ -1,0 +1,15 @@
+@import '../../assets/style/config.scss';
+
+.roomsContainer {
+  @include zIndexChat();
+  position: fixed;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  right: 376px;
+  bottom: 0;
+
+  & > * {
+    margin-left: 16px;
+  }
+}
