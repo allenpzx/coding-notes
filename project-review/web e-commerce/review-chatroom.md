@@ -1,5 +1,7 @@
 ## chatroom review
 
+<img src="./chat-room.gif" alt="img" style="zoom:50%;" />
+
 1. 聊天室基本状态联系人列表点击打开聊天室store
 
 ```typescript
