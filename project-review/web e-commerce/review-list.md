@@ -20,7 +20,7 @@ loadData({…getConditions(), …getNextPage()})
 
 ```typescript
   onCardClick = (id: string) => (e: React.MouseEvent<HTMLDivElement>) =>
-    window.open(`${path.BuyCarDetail}/${id}`);
+    push(`${path.BuyCarDetail}/${id}`);
 
   onCardBottomClick = (id: string) => (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();

@@ -147,17 +147,11 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         const sellerId = _get(data, ['chatroom', 'seller_id']);
         const targetId = meId === sellerId ? _get(data, ['chatroom', 'buyer_id']) : sellerId;
 
-        this.state.page === 1 && results.map((v: any) => (v.isFromHistory = true));
+        results.map((v: any) => (v.isFromHistory = true));
 
-        // hack max room specitial car type
-        const nextResults =
-          this.state.results.length > 0
-            ? results.reverse().concat(this.state.results)
-            : [{ msg_type: CarMessageType }].concat(results.reverse());
-
-        // const nextResults = [{ msg_type: "carMessage" }].concat(
-        //   results.reverse().concat(this.state.results.slice(1))
-        // );
+        const nextResults = [{ msg_type: "carMessage" }].concat(
+          results.reverse().concat(this.state.results.slice(1))
+        );
 
         this.setState({
           ...data,
@@ -173,7 +167,6 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   };
 
   onRoomMessage = (data: any) => {
-    console.log('onMessageFromServer: ', data);
     if (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) {
       this.setState(prev => ({ results: prev.results.concat(data) }));
     }
@@ -220,29 +213,27 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     }
 
     // before latest message exceed 10 minutes
-    // if (
-    //   prevProps.id === this.props.id &&
-    //   prevState.results.length < this.state.results.length
-    // ) {
-    //   const _res = this.state.results;
-    //   const latest = _res.slice(-1)[0];
-    //   if (Reflect.has(latest, "isFromHistory")) return;
-    //   const beforeLatest = _res.slice(-2, -1)[0];
-    //   const beforeLatestTimeStamp = _get(beforeLatest, ["created_at"]);
-    //   const isExceedTenMinutes = getMessageTime(beforeLatestTimeStamp);
-    //   // console.log("beforeLatest: ", beforeLatest);
-    //   // console.log("beforeLatestTimeStamp: ", beforeLatestTimeStamp);
-    //   // console.log("isExceedTenMinutes: ", isExceedTenMinutes);
-    //   isExceedTenMinutes &&
-    //     this.setState(prev => {
-    //       const nextResults = prev.results;
-    //       nextResults.splice(-1, 0, {
-    //         msg_type: TimeMessageType,
-    //         extra: { content: isExceedTenMinutes }
-    //       });
-    //       return { results: nextResults };
-    //     });
-    // }
+    if (
+      prevProps.id === this.props.id &&
+      prevState.results.length < this.state.results.length
+    ) {
+      const _res = this.state.results;
+      const latest = _res.slice(-1)[0];
+      if (Reflect.has(latest, "isFromHistory")) return;
+      const beforeLatest = _res.slice(-2, -1)[0];
+      const beforeLatestTimeStamp = _get(beforeLatest, ["created_at"]);
+      const isExceedTenMinutes = getMessageTime(beforeLatestTimeStamp);
+
+      isExceedTenMinutes &&
+        this.setState(prev => {
+          const nextResults = prev.results;
+          nextResults.splice(-1, 0, {
+            msg_type: TimeMessageType,
+            extra: { content: isExceedTenMinutes }
+          });
+          return { results: nextResults };
+        });
+    }
   }
 
   sendImageMessage = async (data: FormData) => {

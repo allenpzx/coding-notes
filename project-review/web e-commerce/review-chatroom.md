@@ -1,6 +1,6 @@
 ## chatroom review
 
-1. 聊天室状态维护
+1. 聊天室基本状态联系人列表点击打开聊天室store
 
 ```typescript
 export interface RoomItem {
@@ -120,14 +120,289 @@ export default (state = initialState, action: ChatAction): ChatStore => {
 };
 ```
 
+- 能够展开的聊天室数量根据窗口宽度来决定
+
+- 聊天室的实例由一个对象数组维护, {id: string, status: 'common' | 'min'}[], id存在且status === 'common'不多开，id存在且status === 'min'的重新实例化，id不存在的push进去，id超过数量替换第一个
+
+  ```javascript
+    changRoomStatus = async () => {
+      this.props.updateActiveRoomId(this.props.id, this.props.type === 'common' ? 'min' : 'common');
+    };
+  
+    closeRoom = async () => {
+      this.props.id && this.props.deleteActiveRoomId(this.props.id);
+    };
+  
+    onMaxRoomClose = () => {
+      this.props.onMaxRoomClose && this.props.onMaxRoomClose(this.props.id);
+    };
+  ```
+
+  
+
+2. 聊天室数据初始化及websocket链接
+
+   ```javascript
+     getRoomHistory = async () => {
+       try {
+         if (!this.props.id) return;
+         this.setState({ loading: true });
+         const { data, status } = await getRoomHistory(this.props.id, {
+           page: this.state.page
+         });
+         if (status === 200 && data) {
+           const results = _get(data, ['results']) || [];
+           const meId = this.props.user.userInfo.userId;
+           const sellerId = _get(data, ['chatroom', 'seller_id']);
+           const targetId = meId === sellerId ? _get(data, ['chatroom', 'buyer_id']) : sellerId;
+   
+           // 标记history来源的message
+           results.map((v: any) => (v.isFromHistory = true));
+   
+           // 业务上永远放在第一个位置的聊天卡片
+           const nextResults = [{ msg_type: "carMessage" }].concat(
+           	results.reverse().concat(this.state.results.slice(1))
+           );
+   
+           this.setState({
+             ...data,
+             targetId,
+             results: nextResults
+           });
+         }
+       } catch (error) {
+         ...
+       } finally {
+         this.setState({ loading: false });
+       }
+     };
+   
+     onRoomMessage = (data: any) => {
+       console.log('onMessageFromServer: ', data);
+       if (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) {
+         this.setState(prev => ({ results: prev.results.concat(data) }));
+       }
+       if (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url'])) {
+         this.setState(prev => ({ results: prev.results.concat(data) }));
+       }
+       if (_get(data, ['msg_type']) === 6) {
+         this.setState(prev => ({ results: prev.results.concat(data) }));
+       }
+       if (_get(data, ['msg_type']) === 8) {
+         this.setState(prev => ({ results: prev.results.concat(data) }));
+       }
+       ...
+     };
+   
+     connectToRoom = () => {
+       const room = new WebSocketManager({
+         chatroom_id: this.props.id,
+         onMessage: this.onRoomMessage
+       });
+       this.ROOM = room;
+     };
+   
+     refreshUnread = () => this.props.refreshUnread(this.props.id, this.activeRole);
+   
+     initialRoom = async () => {
+       if (this.props.id) {
+         this.refreshUnread(); // 刷新列表的未读
+         await this.getRoomHistory(); // 先获取聊天室的聊天历史记录
+         this.connectToRoom(); // 建立聊天室的websocket
+       }
+     };
+   
+     async componentDidMount() {
+       this.initialRoom();
+     }
+   
+     componentWillUnMount() {
+       this.ROOM.hasOwnProperty('close') && this.ROOM.close();
+     }
+   
+     componentDidUpdate(prevProps: ContainerProps, prevState: ContainerState) {
+       if (prevProps.id !== this.props.id && this.props.id) {
+         this.setState({ ...initialState }, () => this.initialRoom());
+       }
+   
+       // before latest message exceed 10 minutes
+       if (
+         prevProps.id === this.props.id &&
+         prevState.results.length < this.state.results.length
+       ) {
+         const _res = this.state.results;
+         const latest = _res.slice(-1)[0];
+         if (Reflect.has(latest, "isFromHistory")) return;
+         const beforeLatest = _res.slice(-2, -1)[0];
+         const beforeLatestTimeStamp = _get(beforeLatest, ["created_at"]);
+         const isExceedTenMinutes = getMessageTime(beforeLatestTimeStamp);
+         isExceedTenMinutes &&
+           this.setState(prev => {
+             const nextResults = prev.results;
+             nextResults.splice(-1, 0, {
+               msg_type: TimeMessageType,
+               extra: { content: isExceedTenMinutes }
+             });
+             return { results: nextResults };
+           });
+       }
+     }
+     ...
+   ```
+
+   - 聊天室的初始化的时候要 reset_unread => load history => connectRoom，组件卸载的时候要取消websocket的监听
+   - history来源的数据可以标记来源，方便处理消息间隔和特殊业务消息置顶等问题
+   - componentDidUpdate 如果room id更新初始化状态并重新获取数据
+
+   3. 聊天室分页和收发消息
+
+   - 聊天消息是以对象数组的形式维护的，最新的消息在数组的最后面，监听容器内滚动到顶部之后请求下一页的数据, 然后塞到上一页数据的上面，也就是数组的前面
+
+   - 发送消息推送出去有两种处理方式
+
+     1. 发送消息之后等待websocket onmessage的消息符合history数据类型的更新到数组的最后一条，页面更新
+     2. 发送消息的时候发送消息和生成的id，将消息立即推入数组中，消息的状态有'pending' | 'success' | 'error' 三种状态，默认message_type = 'pending', onmessage的时候会返回id, 从数组由后向前找到id匹配的数据之后将message_type制成 'success' 或者 'error'，一般 'pending' 的消息有一个timeout时间，根据业务需求来定，超过timeout时间自动'error'， 第一期我们采取了第一种处理方式，下一个迭代周期将采取第二种
+
+     ```javascript
+       detectScroll = (e: any) => {
+         const st = e && e.target && e.target.scrollTop;
+         st <= 0 && !this.props.loading && this.props.onPageChange();
+       };
+     
+       detectRoomScroll = () => {
+         this.main.current.addEventListener('scroll', throttle(this.detectScroll, 500, {}));
+       };
+     
+       undetectRoomScroll = () => {
+         this.main.current.removeEventListener('scroll', throttle(this.detectScroll, 500, {}));
+       };
+     
+       focusOnInput = () => this.inputArea.current && this.inputArea.current.focus();
+     
+       scrollToBottom = () => {
+         setTimeout(() => {
+           this.main.current &&
+             this.main.current.scroll({
+               top: 9999,
+               behavior: 'smooth'
+             });
+         }, 500);
+       };
+     
+       onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+         this.setState({ inputContent: e.target.value });
+     
+       onTextMessage = (e: React.KeyboardEvent) => {
+         if (e.keyCode === 13) {
+           e.preventDefault();
+           this.props.textMessage(this.state.inputContent);
+           this.setState({ inputContent: '' });
+         }
+       };
+     
+       componentDidMount() {
+         this.detectRoomScroll();
+         this.focusOnInput();
+         util.lockScroll(styles.main_common);
+       }
+     
+       componentWillUnmount() {
+         this.undetectRoomScroll();
+       }
+     
+       componentDidUpdate(prevProps: CommonRoomProps) {
+         if (
+           _get(prevProps.results.slice(-1)[0], ['id']) ===
+             _get(this.props.results.slice(-2)[0], ['id']) ||
+           (_get(prevProps.results, ['length']) === 0 && _get(this.props.results, ['length']) > 0)
+         ) {
+           this.scrollToBottom();
+         }
+       }
+     
+     // history分页
+     onPageChange = () => {
+         if (this.state.next) {
+           this.setState(
+             prev => ({
+               page: prev.page + 1
+             }),
+             () => this.getRoomHistory()
+           );
+         }
+       };
+     ```
+
+4. 发送图片消息和上传图片一样，先上传图片拿到cdn地址，然后发送消息采用cdn地址.上传图片的按钮记得e.target.value重新初始化
+
+   ```javascript
+   const onImageMessage = (e: React.ChangeEvent<HTMLInputElement>, cb: any) => {
+     try {
+       const files = _get(e, ['target', 'files']);
+       const formData = new FormData();
+       formData.append('image', files[0]);
+       cb && cb(formData);
+       e.target.value = '';
+     } catch (e) {
+   		...
+     }
+   };
+   ```
+
+   
+
+5. 有新消息之后滚动到新消息最下面，图片消息需要特殊处理，大图片的render需要一定的时间，dynamic height, scrollbottom之后图片渲染完成会有一段额外的高度，处理方式是最新的消息如果是图片则再触发一次 scrollbottom 即可解决 
+
+   ```html
+   <img src="..." alt="..." onLoad="" onError="" />
+   ```
+
+6. stacking context.  z-index 是相对的. 相邻兄弟A和B元素z-index: 100;，其中A元素的子元素a1如果z-index: 999; 宽高足够大 也不会遮挡B
+
+7. 聊天消息的气泡三角形
+
+```scss
+// 实心三角心
+&_left {
+    color: #ffffff;
+    &:before {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 12px;
+      width: 0px;
+      height: 0px;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 6px solid $blue;
+    }
+  }
+}
 
 
-2. 滚动到底 scroll({ top: 9999, behavior: 'smooth' }) img render 之后 dynamic height 最后一张图片加载完成之后 img onload 触发 scroll
+// 
+    &:before,
+    &:after {
+      content: '\0020';
+      display: block;
+      position: absolute;
+      top: 12px;
+      left: -6px;
+      z-index: 2;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      border: solid 6px transparent;
+      border-left: 0;
+      border-right-color: #fff;
+    }
 
-3. send message with a generator hash id . When web socket receive message check message_id, and find the id in room message list turn it on finished.
+    &:before {
+      left: -7px;
+      z-index: 1;
+      border-right-color: #ebebeb;
+      transform: scale(1.1);
+    }
+  }
+```
 
-1. 滚动穿透
-2. 10 分钟后 message time
-3. 图片上传成功之后 记得清空 input 的值
-4. 聊天消息的气泡三角形
-5. z-index stacking context。 元素中 z-index 层级较低的元素内部 即使有非常高的 z-index 也是相对于元素内的堆叠，不会影响父元素的层级堆叠
