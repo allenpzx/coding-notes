@@ -1,16 +1,5 @@
 import { IntlShape } from 'react-intl';
 
-export enum CarType {
-  garage = 'garage',
-  market = 'market',
-  IR = 4
-}
-
-export enum CarStatus {
-  InStock = 'in stock',
-  InComing = 'incoming'
-}
-
 export interface IMakeName {
   key: string;
   display_value: string;
@@ -31,8 +20,9 @@ export interface UserType {
   company_country: 'string';
 }
 
-export interface BuyMarketListItemType {
+export interface CardType {
   id: string;
+  is_new_car: boolean;
   display_name: string;
   price: string;
   car_status: number;
@@ -57,5 +47,10 @@ export interface BuyMarketListItemType {
   user_company_country: string;
   money_symbol: string;
   onCardClick: (id: string) => any;
-  onCardBottomClick: (id: string) => any;
+  onCardBottomClick: (arg: { id: string; type: cardEventType }) => any;
 }
+
+export type buyMarketCardType = 'none';
+export type sellMarketCardType = 'edit_sell_market' | 'move_to_garage' | 'remove_sell_market';
+export type sellGarageCardType = 'publish' | 'edit_sell_garage' | 'remove_sell_garage';
+export type cardEventType = buyMarketCardType | sellMarketCardType | sellGarageCardType;

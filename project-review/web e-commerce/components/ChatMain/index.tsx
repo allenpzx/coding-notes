@@ -1,8 +1,15 @@
+/**
+ * @description: 聊天室组件 special for <CommonRoom />s view
+ * @param {Props}
+ * @return {ReactNode}
+ * @author zixiu
+ */
+
 import React from 'react';
 import { connect } from 'react-redux';
 import { AppStore } from '../../store/reducers';
 import Main from './Main';
-import { RoomItem, ChatRole, ChatStore, ChatMode } from '../../store/types';
+import { RoomItem, ChatStore, ChatMode } from '../../store/types';
 import styles from './index.module.scss';
 
 interface ContainerProps {
@@ -32,11 +39,6 @@ class ChatContainer extends React.Component<ContainerProps, {}> {
             activeRole={activeRole}
           />
         ))}
-        {/* <Main
-            id={"212202b9-e7a1-4a7f-9b54-67b84b989191"}
-            type="max"
-            onMaxRoomClose={() => console.log(123)}
-          /> */}
       </div>
     );
   }

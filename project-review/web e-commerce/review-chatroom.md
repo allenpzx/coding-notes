@@ -260,28 +260,129 @@ onMaxRoomClose = () => {
 3. 聊天室分页和收发消息
 
 - 聊天消息是以对象数组的形式维护的，最新的消息在数组的最后面，监听容器内滚动到顶部之后请求下一页的数据, 然后塞到上一页数据的上面，也就是数组的前面
+- 发送消息处理
+1. 生成模版消息, 模版消息符合room history 子项的格式,  客户端生成uuid
 
-- 发送消息推送出去有两种处理方式
+    ```typescript
+    interface Message {
+      id?: string; // 服务端生成
+      message_id: string; // 客户端生成
+      message_type: string; // 和服务端约定不同的消息类型
+      message_status: 'pending' | 'success' | 'error';
+      // pending 等待状态 消息一侧出现loading的动画
+      // success 消息发送成功状态 一条普通消息，没有任何状态动画
+      // error 发送失败或者timeout 状态, 一个🈲️的状态，表示发送失败，hover之后🈲️的图标变成resend的图标，点击即可重新发送消息
+      extra: {
+        content: string;
+        url?: stirng;
+        ...
+      };
+      is_from_history: boolean; // 标记消息来源于hisroty 请求还是websocket
+    	sender: {
+        ...
+      };
+      receiver: {
+        ...
+      };
+      ...
+    }
+    
+    type RoomHistory = Message[];
+       
+    function generateMessage(message_id: string) {
+      return {
+    	  message_id: message_id,
+    	  message_type: ...,
+        message_status: 'pending', // default
+        extra: {
+          ...
+        };
+        is_from_history: false;
+        sender: {
+          ...
+        };
+        receiver: {
+          ...
+        };
+      }
+    }
+    
+    const nextMessage = generateMessage(..., message_id): Message
+    ```
 
-1.  发送消息之后等待 websocket onmessage 的消息符合 history 数据类型的更新到数组的最后一条，页面更新
-2.  发送消息的时候发送消息和生成的 id，将消息立即推入数组中，消息的状态有'pending' | 'success' | 'error' 三种状态，默认 message_type = 'pending', onmessage 的时候会返回 id, 从数组由后向前找到 id 匹配的数据之后将 message_type 制成 'success' 或者 'error'，一般 'pending' 的消息有一个 timeout 时间，根据业务需求来定，超过 timeout 时间自动'error'， 第一期我们采取了第一种处理方式，下一个迭代周期将采取第二种
+2. 先将message_type = 'pending' 的消息推入聊天室数组的末端, 并通过websocket发送消息, 然后把这条消息推入到一个定时的队列里，如果超过一定时间这条消息的状态 message_type = 'pending',  则把这条消息  message_type = 'error'， 此时这条消息会出现error状态，鼠标hover之后可以选择是否重发，如果重发则把这个消息移动到数组的尾端，重新发送
+
+    ```typescript
+    1. this.setState(prev => ({ prev.history.concat(nextMessage) }))
+    2. ROOM.send(nextMessage)
+    3. checkMessageTimeout = (message_id: string) => {
+        setTimeout(() => {
+          const next = this.state.results.slice();
+          for (let i = next.length - 1; i > 0; i--) {
+            if (Reflect.has(next[i], 'message_id') && next[i]['message_id'] === message_id) {
+              this.state.results[i].messageStatus === 'pending' &&
+                Reflect.set(next[i], 'messageStatus', 'error');
+              break;
+            }
+          }
+          this.setState({ results: next });
+        }, TIME_OUT);
+      };
+    ```
+
+3. 监听websocket的推送, 如果推送的消息A符合`Message`的类型, 则检查A是否有message_id, 如果有message_id 就从history从后向前查找message_id和A相同的那条消息N, 并把消息N的message_status = 'success'
+
+    ```typescript
+    function onRoomMessage(data: Message) {
+        if (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) {
+          const receive_message_id = _get(data, ['message_id']);
+          this.setState(prev => {
+            const nextResults = prev.results.slice();
+            for (let i = nextResults.length - 1; i > 0; i--) {
+              if (
+                Reflect.has(nextResults[i], 'message_id') &&
+                nextResults[i]['message_id'] === receive_message_id
+              ) {
+                this.state.results[i].messageStatus === 'pending' &&
+                  Reflect.set(nextResults[i], 'messageStatus', 'success');
+                break;
+              }
+            }
+            return { results: nextResults };
+          });
+        }
+        if (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url'])) {
+          ...
+        }
+        if (_get(data, ['msg_type']) === 6) {
+          ...
+        }
+        if (_get(data, ['msg_type']) === 8) {
+          ...
+        }
+    }
+    
+    ROOM.onmessage(onRoomMessage)
+    ```
+
+4. 滚动监听记得取消监听，聊天室层级比较高，一定要防止滚动穿透，根据业务需求还要优化或者聊天室滚动条
 
     ```javascript
       detectScroll = (e: any) => {
         const st = e && e.target && e.target.scrollTop;
         st <= 0 && !this.props.loading && this.props.onPageChange();
       };
-
+    
       detectRoomScroll = () => {
         this.main.current.addEventListener('scroll', throttle(this.detectScroll, 500, {}));
       };
-
+    
       undetectRoomScroll = () => {
         this.main.current.removeEventListener('scroll', throttle(this.detectScroll, 500, {}));
       };
-
+    
       focusOnInput = () => this.inputArea.current && this.inputArea.current.focus();
-
+    
       scrollToBottom = () => {
         setTimeout(() => {
           this.main.current &&
@@ -291,10 +392,10 @@ onMaxRoomClose = () => {
             });
         }, 500);
       };
-
+    
       onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
         this.setState({ inputContent: e.target.value });
-
+    
       onTextMessage = (e: React.KeyboardEvent) => {
         if (e.keyCode === 13) {
           e.preventDefault();
@@ -302,17 +403,17 @@ onMaxRoomClose = () => {
           this.setState({ inputContent: '' });
         }
       };
-
+    
       componentDidMount() {
         this.detectRoomScroll();
         this.focusOnInput();
         util.lockScroll(styles.main_common);
       }
-
+    
       componentWillUnmount() {
         this.undetectRoomScroll();
       }
-
+    
       componentDidUpdate(prevProps: CommonRoomProps) {
         if (
           _get(prevProps.results.slice(-1)[0], ['id']) ===
@@ -322,7 +423,7 @@ onMaxRoomClose = () => {
           this.scrollToBottom();
         }
       }
-
+    
     // history分页
     onPageChange = () => {
         if (this.state.next) {
@@ -336,7 +437,7 @@ onMaxRoomClose = () => {
       };
     ```
 
-3.  发送图片消息和上传图片一样，先上传图片拿到 cdn 地址，然后发送消息采用 cdn 地址.上传图片的按钮记得 e.target.value 重新初始化
+5. 发送图片消息和上传图片一样，先上传图片拿到 cdn 地址，然后发送消息采用 cdn 地址.上传图片的按钮记得 e.target.value 重新初始化
 
     ```javascript
     const onImageMessage = (e: React.ChangeEvent<HTMLInputElement>, cb: any) => {
@@ -352,15 +453,82 @@ onMaxRoomClose = () => {
     };
     ```
 
-4.  有新消息之后滚动到新消息最下面，图片消息需要特殊处理，大图片的 render 需要一定的时间，dynamic height, scrollbottom 之后图片渲染完成会有一段额外的高度，处理方式是最新的消息如果是图片则再触发一次 scrollbottom 即可解决
+6. 有新消息之后滚动到新消息最下面，图片消息需要特殊处理，大图片的 render 需要一定的时间，dynamic height, scrollbottom 之后图片渲染完成会有一段额外的高度，处理方式是最新的消息如果是图片则再触发一次 scrollbottom 即可解决
 
     ```html
     <img src="..." alt="..." onLoad="" onError="" />
     ```
 
-5.  stacking context. z-index 是相对的. 相邻兄弟 A 和 B 元素 z-index: 100;，其中 A 元素的子元素 a1 如果 z-index: 999; 宽高足够大 也不会遮挡 B
+7. stacking context. z-index 是相对的. 相邻兄弟 A 和 B 元素 z-index: 100;，其中 A 元素的子元素 a1 如果 z-index: 999; 宽高足够大 也不会遮挡 B， 所以在包或者写Modal或者notification组件的时候可以放到最外层用store控制， 或者用portal传送到组件的外层，防止干扰
 
-6.  聊天消息的气泡三角形
+    ```typescript
+    /**
+     * @description: 受控组件ui modal组件, 参数详见props
+     * @param {Props}
+     * @return {ReactNode}
+     * @author zixiu
+     */
+    
+    import React, { Component, SFC } from 'react';
+    import ReactDOM from 'react-dom';
+    import { Modal, Button } from 'antd';
+    import IconFont from '../ui/TradexIcon';
+    import styles from './index.module.scss';
+    
+    class CusPortal extends Component {
+      private el = document.createElement('div');
+      private appRoot = document.getElementById('root') as Element;
+      componentDidMount() {
+        this.appRoot.appendChild(this.el);
+      }
+      componentWillUnmount() {
+        this.appRoot.removeChild(this.el);
+      }
+      render() {
+        return ReactDOM.createPortal(this.props.children, this.el);
+      }
+    }
+    
+    interface Props {
+      onOk: any;
+      onCancel: any;
+      visible: boolean;
+      message: string;
+      cancelText: string;
+      okText: string;
+      title?: string;
+    }
+    
+    const CusModal: SFC<Props> = ({ visible, message, title, onOk, onCancel, cancelText, okText }) => (
+      <CusPortal>
+        <Modal
+          visible={visible}
+          onOk={onOk}
+          onCancel={onCancel}
+          title={title}
+          closeIcon={<IconFont type="iconicon_cancel" />}
+          centered
+          className={styles.modal}
+          footer={[
+            <Button key="cancel" onClick={onCancel} className={styles.btnCancel}>
+              {cancelText}
+            </Button>,
+            <Button key="submit" onClick={onOk} className={styles.btnOk}>
+              {okText}
+            </Button>
+          ]}
+        >
+          <p>{message}</p>
+        </Modal>
+      </CusPortal>
+    );
+    
+    export default CusModal;
+    ```
+
+    
+
+8. 聊天消息的气泡三角形
 
 ```scss
 // 实心三角心

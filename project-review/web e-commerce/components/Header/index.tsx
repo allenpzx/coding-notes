@@ -121,12 +121,16 @@ class Header extends React.Component<OutterProps, State> {
     const {
       user: {
         userInfo: { display_name, headshot }
-      }
+      },
+      location: { pathname }
     } = this.props;
     const { menuShow, mainMenu, path, notification } = this.state;
 
-    const matchPath = (arg: string): boolean =>
-      allPath.BuyMarket.replace(/^\/trade/, '').startsWith(arg);
+    const matchPath = (route: string): boolean => pathname.startsWith(route);
+
+    // allPath
+    console.log('matchPath: ', matchPath('/trade/sell/market/list'));
+    // console.log(this.props);
 
     return (
       <header className={styles.container}>
@@ -137,9 +141,9 @@ class Header extends React.Component<OutterProps, State> {
 
           <ul className={styles.menu}>
             <li
-              className={`${styles.menuItem} ${matchPath('/buy') ? styles.active : ''} ${
-                menuShow && mainMenu === 1 ? styles.menuItemActive : ''
-              }`}
+              className={`${styles.menuItem} ${
+                matchPath('/trade/buy/market/list') ? styles.active : ''
+              } ${menuShow && mainMenu === 1 ? styles.menuItemActive : ''}`}
               onMouseOver={this.onMainMouseOver(1)}
               onMouseLeave={this.onMainMouseLeave}
             >
@@ -150,7 +154,7 @@ class Header extends React.Component<OutterProps, State> {
               <IconFont type="iconicon_dropdown_line" className={styles.itemNex} />
             </li>
             <li
-              className={`${styles.menuItem} ${matchPath('/sell') ? styles.active : ''} ${
+              className={`${styles.menuItem} ${matchPath('/trade/sell/') ? styles.active : ''} ${
                 menuShow && mainMenu === 2 ? styles.menuItemActive : ''
               }`}
               onMouseOver={this.onMainMouseOver(2)}
@@ -203,7 +207,9 @@ class Header extends React.Component<OutterProps, State> {
             onMouseLeave={this.onMainMouseLeave}
           >
             <span
-              className={`${styles.subMenuItem} ${matchPath('/buy/market') ? styles.active : ''}`}
+              className={`${styles.subMenuItem} ${
+                matchPath('/trade/buy/market/list') ? styles.active : ''
+              }`}
               onClick={this.goto(allPath.BuyMarket)}
             >
               Market
@@ -224,29 +230,26 @@ class Header extends React.Component<OutterProps, State> {
             onMouseOver={this.onMainMouseOver(2)}
             onMouseLeave={this.onMainMouseLeave}
           >
+            <span
+              className={`${styles.subMenuItem} ${
+                matchPath('/trade/sell/market/list') ? styles.active : ''
+              }`}
+              onClick={this.goto(allPath.SellMarket)}
+            >
+              Market
+            </span>
+
+            <span
+              className={`${styles.subMenuItem} ${
+                matchPath('/trade/sell/garage/list') ? styles.active : ''
+              }`}
+              onClick={this.goto(allPath.SellGarage)}
+            >
+              Garage
+            </span>
+
             <CustomPopover type="comingsoon">
               <span
-                // onClick={this.goto('/market')}
-                className={`${styles.subMenuItem} ${
-                  matchPath('/sell/market') ? styles.active : ''
-                }`}
-              >
-                Market
-              </span>
-            </CustomPopover>
-            <CustomPopover type="comingsoon">
-              <span
-                // onClick={this.goto('/garage')}
-                className={`${styles.subMenuItem} ${
-                  matchPath('/sell/garage') ? styles.active : ''
-                }`}
-              >
-                Garage
-              </span>
-            </CustomPopover>
-            <CustomPopover type="comingsoon">
-              <span
-                // onClick={this.goto('/create')}
                 className={`${styles.subMenuItem} ${
                   matchPath('/sell/create') ? styles.active : ''
                 }`}

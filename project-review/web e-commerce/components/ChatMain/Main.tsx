@@ -1,3 +1,10 @@
+/**
+ * @description: 聊天室组件 Main(container) => <MaxRoom /> | <CommonRoom /> | <MiniRoom />, low coupling
+ * @param {Props}
+ * @return {ReactNode}
+ * @author zixiu
+ */
+
 import React from 'react';
 import { MaxRoom, CommonRoom, MinRoom } from './Room';
 import { sendImageMessage, getRoomHistory } from '../../api/chat';
@@ -11,7 +18,23 @@ import { deleteActiveRoomId, updateActiveRoomId } from '../../store/actions/chat
 import { UnionChatRouteGoTo } from '../../store/actions/route';
 import { ChatMode, ChatRole } from '../../store/types';
 import { upDateRoomUnread } from '../../store/actions/chat';
-import { CarMessageType, TimeMessageType } from './Message';
+import { TimeMessageType, MessageStatus } from './Message';
+
+interface MessageType {
+  msg_type: number | string;
+  extra: object;
+  messageStatus?: MessageStatus;
+  sender?: {
+    id: string;
+    headshot: string;
+    company_country: string;
+  };
+  id?: string;
+  message_id?: string;
+  [key: string]: any;
+}
+
+const MESSAGE_TIME_OUT = 10000;
 
 const getMessageTime = (last: string) => {
   if (!last) return false;
@@ -20,12 +43,6 @@ const getMessageTime = (last: string) => {
   const now = Date.now();
   const dateDiff = now - prev;
   const minuteDiff = Math.floor(dateDiff / (60 * 1000));
-  // console.log('last: ', last);
-  // console.log('originPrev: ', originPrev);
-  // console.log('prev: ', prev);
-  // console.log('now: ', now);
-  // console.log('minuteDiff: ', minuteDiff);
-  // console.log('dateDiff: ', dateDiff);
   if (!Number.isInteger(minuteDiff) || minuteDiff < 11) {
     return false;
   }
@@ -36,20 +53,27 @@ const getMessageTime = (last: string) => {
   const hour = `${originPrev.getHours() < 10 ? '0' : ''}${originPrev.getHours()}`;
   const minute = `${originPrev.getMinutes() < 10 ? '0' : ''}${originPrev.getMinutes()}`;
   if (dayDiff <= 1) {
-    console.log('within 1 day');
     return `${hour}:${minute}`;
   }
   if (dayDiff <= 2) {
-    console.log('within 2 day');
     return `yesterday ${hour}:${minute}`;
   }
   if (dayDiff <= 365) {
-    console.log('within 1 year');
     return `${month}-${day} ${hour}:${minute}`;
   }
-  console.log('more than one year');
   return `${year}-${month}-${day} ${hour}:${minute}`;
 };
+
+function uniqueID() {
+  function chr4() {
+    return Math.random()
+      .toString(16)
+      .slice(-4);
+  }
+  return (
+    chr4() + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + chr4() + chr4()
+  );
+}
 
 export type RoomType = 'max' | 'min' | 'common';
 
@@ -72,7 +96,7 @@ interface ContainerState {
   count: number;
   next: string;
   previous: string;
-  results: any[];
+  results: MessageType[];
   server_time: string;
   status: string;
   chatroom: any;
@@ -147,9 +171,12 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         const sellerId = _get(data, ['chatroom', 'seller_id']);
         const targetId = meId === sellerId ? _get(data, ['chatroom', 'buyer_id']) : sellerId;
 
-        results.map((v: any) => (v.isFromHistory = true));
+        results.map((v: any) => {
+          v.isFromHistory = true;
+          v.messageStatus = 'success';
+        });
 
-        const nextResults = [{ msg_type: "carMessage" }].concat(
+        const nextResults = [{ msg_type: 'carMessage' }].concat(
           results.reverse().concat(this.state.results.slice(1))
         );
 
@@ -167,8 +194,23 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   };
 
   onRoomMessage = (data: any) => {
+    console.log('onMessageFromServer: ', data);
     if (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) {
-      this.setState(prev => ({ results: prev.results.concat(data) }));
+      const receive_message_id = _get(data, ['message_id']);
+      this.setState(prev => {
+        const nextResults = prev.results.slice();
+        for (let i = nextResults.length - 1; i > 0; i--) {
+          if (
+            Reflect.has(nextResults[i], 'message_id') &&
+            nextResults[i]['message_id'] === receive_message_id
+          ) {
+            this.state.results[i].messageStatus === 'pending' &&
+              Reflect.set(nextResults[i], 'messageStatus', 'success');
+            break;
+          }
+        }
+        return { results: nextResults };
+      });
     }
     if (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url'])) {
       this.setState(prev => ({ results: prev.results.concat(data) }));
@@ -213,17 +255,13 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     }
 
     // before latest message exceed 10 minutes
-    if (
-      prevProps.id === this.props.id &&
-      prevState.results.length < this.state.results.length
-    ) {
+    if (prevProps.id === this.props.id && prevState.results.length < this.state.results.length) {
       const _res = this.state.results;
       const latest = _res.slice(-1)[0];
-      if (Reflect.has(latest, "isFromHistory")) return;
+      if (Reflect.has(latest, 'isFromHistory')) return;
       const beforeLatest = _res.slice(-2, -1)[0];
-      const beforeLatestTimeStamp = _get(beforeLatest, ["created_at"]);
+      const beforeLatestTimeStamp = _get(beforeLatest, ['created_at']);
       const isExceedTenMinutes = getMessageTime(beforeLatestTimeStamp);
-
       isExceedTenMinutes &&
         this.setState(prev => {
           const nextResults = prev.results;
@@ -235,6 +273,20 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         });
     }
   }
+
+  checkMessage = (message_id: string) => {
+    setTimeout(() => {
+      const next = this.state.results.slice();
+      for (let i = next.length - 1; i > 0; i--) {
+        if (Reflect.has(next[i], 'message_id') && next[i]['message_id'] === message_id) {
+          this.state.results[i].messageStatus === 'pending' &&
+            Reflect.set(next[i], 'messageStatus', 'error');
+          break;
+        }
+      }
+      this.setState({ results: next });
+    }, MESSAGE_TIME_OUT);
+  };
 
   sendImageMessage = async (data: FormData) => {
     try {
@@ -248,13 +300,41 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     }
   };
 
+  getTextMessageTemplate = (text: string, id: string): MessageType => {
+    const {
+      userInfo: { userId, headshot, company_country }
+    } = this.props.user;
+    return {
+      msg_type: 1,
+      messageStatus: 'pending',
+      extra: {
+        content: text
+      },
+      sender: {
+        id: userId,
+        headshot: headshot,
+        company_country: company_country
+      },
+      message_id: id
+    };
+  };
+
   sendTextMessage = async (text: string) => {
     try {
       if (!this.props.id) return;
       this.setState({ loading: true });
-      !!text.trim() && this.ROOM.send({ message: text });
+      if (!!text.trim()) {
+        const message_id = uniqueID();
+        this.ROOM.send({ message: text, message_id });
+        this.setState(
+          prev => ({
+            results: prev.results.concat(this.getTextMessageTemplate(text, message_id))
+          }),
+          () => this.checkMessage(message_id)
+        );
+      }
     } catch (e) {
-      console.log('send text error: ', e.response);
+      console.log('send text error: ', e);
     } finally {
       this.setState({ loading: false });
     }
@@ -285,6 +365,23 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     }
   };
 
+  resendMessage = (message: any) => (e: React.MouseEvent<HTMLDivElement>) => {
+    let targetMessage: any;
+    this.setState(
+      prev => {
+        const next = prev.results.slice();
+        const index = next.findIndex(
+          v => Reflect.has(v, 'message_id') && v.message_id === message.message_id
+        );
+        targetMessage = next.splice(index, 1)[0];
+        return {
+          results: next
+        };
+      },
+      () => this.sendTextMessage(_get(targetMessage, ['extra', 'content']))
+    );
+  };
+
   render() {
     const { user, type, id } = this.props;
     const { targetId, results, chatroom, loading } = this.state;
@@ -297,12 +394,6 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       _get(matchTarget, ['sender_id']) === targetId
         ? _get(matchTarget, ['sender'])
         : _get(matchTarget, ['receiver']);
-
-    // target
-    // const target =
-    //   _get(results.slice(-1)[0], ["sender_id"]) === targetId
-    //     ? _get(results.slice(-1)[0], ["sender"])
-    //     : _get(results.slice(-1)[0], ["receiver"]);
 
     const targetName =
       _get(target, ['display_name']) || _get(chatroom, ['opposite', 'display_name']);
@@ -357,6 +448,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
             closeRoom={this.closeRoom}
             // maxRoom={this.maxRoom}
             onPageChange={this.onPageChange}
+            resendMessage={this.resendMessage}
           />
         )}
 
@@ -401,6 +493,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
             textMessage={this.sendTextMessage}
             onClose={this.onMaxRoomClose}
             onPageChange={this.onPageChange}
+            resendMessage={this.resendMessage}
           />
         )}
       </React.Fragment>

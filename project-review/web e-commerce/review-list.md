@@ -27,4 +27,3 @@ loadData({…getConditions(), …getNextPage()})
 		...
   };
 ```
-

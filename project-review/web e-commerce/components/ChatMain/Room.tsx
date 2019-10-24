@@ -1,3 +1,10 @@
+/**
+ * @description: pure ui component, mutiple rooms
+ * @param {Props}
+ * @return {ReactNode}
+ * @author zixiu
+ */
+
 import React, { ReactNode } from 'react';
 import IconFont from '../ui/TradexIcon';
 import _get from '../../common/get';
@@ -129,6 +136,7 @@ interface MaxRoomProps extends React.SFC {
   textMessage: (text: string) => any;
   onClose: () => any;
   onPageChange: () => any;
+  resendMessage: any;
 }
 
 interface MaxRoomState {
@@ -181,9 +189,7 @@ export class MaxRoom extends React.Component<MaxRoomProps, MaxRoomState> {
 
   componentDidUpdate(prevProps: MaxRoomProps) {
     if (
-      _get(prevProps.results.slice(-1)[0], ['id']) ===
-        _get(this.props.results.slice(-2)[0], ['id']) ||
-      (_get(prevProps.results, ['length']) === 0 && _get(this.props.results, ['length']) > 1)
+      _get(prevProps.results.slice(-1)[0], ['id']) !== _get(this.props.results.slice(-1)[0], ['id'])
     ) {
       this.scrollToBottom();
     }
@@ -229,7 +235,8 @@ export class MaxRoom extends React.Component<MaxRoomProps, MaxRoomState> {
       user: {
         userInfo: { userId, company_country }
       },
-      loading
+      loading,
+      resendMessage
     } = this.props;
     const { inputContent } = this.state;
 
@@ -267,6 +274,8 @@ export class MaxRoom extends React.Component<MaxRoomProps, MaxRoomState> {
               headshot={_get(v, ['sender', 'headshot'])}
               location={_get(v, ['sender', 'company_country'])}
               bubblePosition={bubblePosition}
+              messageStatus={_get(v, ['messageStatus'])}
+              resendMessage={resendMessage(v)}
             />
           );
         }
@@ -410,6 +419,7 @@ interface CommonRoomProps extends React.SFC {
   closeRoom: () => any;
   // maxRoom: () => any;
   onPageChange: () => any;
+  resendMessage: any;
 }
 
 interface CommonRoomState {
@@ -475,9 +485,7 @@ export class CommonRoom extends React.Component<CommonRoomProps, CommonRoomState
 
   componentDidUpdate(prevProps: CommonRoomProps) {
     if (
-      _get(prevProps.results.slice(-1)[0], ['id']) ===
-        _get(this.props.results.slice(-2)[0], ['id']) ||
-      (_get(prevProps.results, ['length']) === 0 && _get(this.props.results, ['length']) > 0)
+      _get(prevProps.results.slice(-1)[0], ['id']) !== _get(this.props.results.slice(-1)[0], ['id'])
     ) {
       this.scrollToBottom();
     }
@@ -508,7 +516,8 @@ export class CommonRoom extends React.Component<CommonRoomProps, CommonRoomState
       },
       changRoomStatus,
       closeRoom,
-      imageMessage
+      imageMessage,
+      resendMessage
       // maxRoom
     } = this.props;
 
@@ -528,6 +537,8 @@ export class CommonRoom extends React.Component<CommonRoomProps, CommonRoomState
               location={_get(v, ['sender', 'company_country'])}
               bubblePosition="right"
               bubbleColor={_get(v, ['sender', 'id']) === userId ? 'blue' : 'white'}
+              messageStatus={_get(v, ['messageStatus'])}
+              resendMessage={resendMessage(v)}
             />
           );
         }
@@ -606,11 +617,7 @@ export class CommonRoom extends React.Component<CommonRoomProps, CommonRoomState
           )}
 
           <div className={styles.btnGroup}>
-            {/* <IconFont type="iconicon_minus_line_thin" className={styles.btn} /> */}
-            <img
-              src={require('../../assets/img/icon_minus_line_thin.svg')}
-              className={styles.svgBtn}
-            />
+            <IconFont type="iconicon_minus_line_thin" className={styles.btn} />
             {/* <IconFont
               type="iconicon_fullscreen"
               className={styles.btn}

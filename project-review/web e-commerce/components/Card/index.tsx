@@ -1,24 +1,28 @@
 /**
- * 卡片组件, props多为必传, 仔细查看CardTypes文件
+ * @description: 卡片组件, props多为必传, 仔细查看CardTypes文件
+ * @param {Props}
+ * @return {ReactNode}
  * @author zixiu
- * @since 1.0.1
- * @version 1.0
  */
 
 import React, { SFC, ReactNode, PureComponent } from 'react';
 import { Tag, Badge } from 'antd';
 import IconFont from '../ui/TradexIcon';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { BuyMarketListItemType } from './CardTypes';
+import { CardType } from './CardTypes';
 import _get from '../../common/get';
 import utils from '../../common/util';
 import styles from './index.module.scss';
 
 const thousands = utils.numberWithCommas;
 
+interface State {
+  logoError: boolean;
+}
+
 @(injectIntl as any)
-class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
-  static defaultProps: BuyMarketListItemType & SFC;
+class Card extends PureComponent<CardType & SFC, State> {
+  static defaultProps: CardType & SFC;
 
   state = {
     logoError: false
@@ -30,8 +34,9 @@ class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
 
   render() {
     let {
-      type, // buy list 传 'buy', sell list 传 'sell'
+      type,
       id,
+      is_new_car,
       image,
       make_logo,
       make_name,
@@ -51,8 +56,8 @@ class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
       price,
       currency,
       msrp,
-      user_company_country, // 判断是不是CN user
-      money_symbol, // 货币符号
+      user_company_country,
+      money_symbol,
       onCardClick,
       onCardBottomClick
     } = this.props;
@@ -99,7 +104,18 @@ class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
         }
       };
 
-      // CN 用户预留 msrp
+      // CN 用户nego
+      if (user_company_country === 'CN' && !is_new_car && distance_to_warehouse <= 350) {
+        return (
+          <div className={styles.price_row}>
+            <div className={styles.left}>
+              <FormattedMessage id="buy_market_card_negotiable" defaultMessage="NEGOTIABLE" />
+            </div>
+          </div>
+        );
+      }
+
+      // CN 用户 msrp
       if (user_company_country === 'CN') {
         return (
           <div className={styles.price_row}>
@@ -150,7 +166,6 @@ class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
           {!logoError && (
             <img className={styles.brandLogo} src={make_logo} onError={this.onLogoError} />
           )}
-          {/* <span className={styles.brandLogo} /> */}
           <span title="123" className={styles.brandName}>
             {_get(make_name, ['display_value'])}
           </span>
@@ -220,7 +235,7 @@ class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
           </span>
         </div>
         {type === 'buy_market' && (
-          <div className={styles.buy_row} onClick={onCardBottomClick(id)}>
+          <div className={styles.buy_row} onClick={onCardBottomClick({ id, type: 'none' })}>
             <div className={styles.left}>
               <Badge dot={false} className={styles.hackDot}>
                 <img
@@ -243,19 +258,50 @@ class Card extends PureComponent<BuyMarketListItemType & SFC, {}> {
             </div>
           </div>
         )}
+
         {type === 'sell_market' && (
           <div className={styles.sell_row}>
-            <span className={styles.sell_row_item}>Edit</span>
-            <span className={styles.sell_row_item}>Move To Garage</span>
-            <span className={styles.sell_row_item}>Remove</span>
+            <span
+              className={styles.sell_row_item}
+              onClick={onCardBottomClick({ id, type: 'edit_sell_market' })}
+            >
+              Edit
+            </span>
+            <span
+              className={styles.sell_row_item}
+              onClick={onCardBottomClick({ id, type: 'move_to_garage' })}
+            >
+              Move To Garage
+            </span>
+            <span
+              className={styles.sell_row_item}
+              onClick={onCardBottomClick({ id, type: 'remove_sell_market' })}
+            >
+              Remove
+            </span>
           </div>
         )}
 
         {type === 'sell_garage' && (
           <div className={styles.sell_garage_row}>
-            <span className={styles.sell_garage_row_item}>Publish</span>
-            <span className={styles.sell_garage_row_item}>Edit</span>
-            <span className={styles.sell_garage_row_item}>Remove</span>
+            <span
+              className={styles.sell_garage_row_item}
+              onClick={onCardBottomClick({ id, type: 'publish' })}
+            >
+              Publish
+            </span>
+            <span
+              className={styles.sell_garage_row_item}
+              onClick={onCardBottomClick({ id, type: 'edit_sell_garage' })}
+            >
+              Edit
+            </span>
+            <span
+              className={styles.sell_garage_row_item}
+              onClick={onCardBottomClick({ id, type: 'remove_sell_garage' })}
+            >
+              Remove
+            </span>
           </div>
         )}
       </div>

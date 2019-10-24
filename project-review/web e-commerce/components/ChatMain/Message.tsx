@@ -1,3 +1,10 @@
+/**
+ * @description: pure ui component, mutiple messages
+ * @param {Props}
+ * @return {ReactNode}
+ * @author zixiu
+ */
+
 import React, { useState } from 'react';
 import IconFont from '../ui/TradexIcon';
 import Mask from '../feedback/Mask';
@@ -5,6 +12,8 @@ import styles from './Message.module.scss';
 
 export const CarMessageType = 'carMessage';
 export const TimeMessageType = 'timeMessage';
+
+export type MessageStatus = 'pending' | 'success' | 'error';
 
 interface TimeMessageProps {
   time: string;
@@ -38,7 +47,6 @@ export const CarMessage: React.SFC<CarMessageProps> = ({
   return carImage ? (
     <div className={`${styles.message_car} ${styles.message}`}>
       <div className={styles.imageArea}>
-        {/* 等服务补字段 */}
         <img src={carMakeLogo} className={styles.makeLogo} />
         <img src={carImage} className={styles.cover} />
       </div>
@@ -99,6 +107,8 @@ interface TextMessageProps extends User {
   content: string;
   bubblePosition: positionType;
   bubbleColor?: colorType;
+  messageStatus?: MessageStatus;
+  resendMessage?: any;
 }
 
 export const TextMessage: React.SFC<TextMessageProps> = ({
@@ -106,7 +116,9 @@ export const TextMessage: React.SFC<TextMessageProps> = ({
   headshot,
   location,
   bubblePosition,
-  bubbleColor
+  bubbleColor,
+  messageStatus,
+  resendMessage
 }) => {
   return (
     <div
@@ -114,6 +126,16 @@ export const TextMessage: React.SFC<TextMessageProps> = ({
         bubblePosition === 'left' ? styles.text_left : styles.text_right
       }`}
     >
+      {messageStatus === 'pending' && (
+        <div className={styles.message_status}>
+          <img src={require('../../assets/img/loading.gif')} />
+        </div>
+      )}
+      {messageStatus === 'error' && (
+        <div className={`${styles.message_status} ${styles.resend}`} onClick={resendMessage}>
+          <IconFont type="iconicon_warning" />
+        </div>
+      )}
       <div className={styles.contentWrap}>
         <Bubble text={content} position={bubblePosition} color={bubbleColor} />
       </div>
