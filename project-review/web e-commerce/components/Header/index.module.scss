@@ -253,18 +253,25 @@ $mainLeft: calc((100% - 1200px) * 0.5);
       align-items: center;
       position: relative;
       @extend .cursor;
+      // border: 1px solid red;
     }
   }
 
-  .subMenu1 {
+  .subMenu_buy {
     opacity: 1;
     transform: scale(1, 1);
     padding-left: calc(((100% - 1200px) * 0.5) + 200px);
   }
-  .subMenu2 {
+  .subMenu_sell {
     opacity: 1;
     transform: scale(1, 1);
     padding-left: calc(((100% - 1200px) * 0.5) + 280px);
+  }
+  .subMenu_order {
+    opacity: 1;
+    transform: scale(1, 1);
+    justify-content: flex-end;
+    padding-right: 156px;
   }
 }
 
@@ -287,4 +294,15 @@ $mainLeft: calc((100% - 1200px) * 0.5);
   position: relative;
   paddingLeft: $mainLeft;
   paddingRight: $mainLeft;
+}
+
+.orderPagePadding {
+  margin-bottom: 45px;
+
+  .subMenu_order {
+    opacity: 1;
+    transform: scale(1, 1);
+    justify-content: flex-end;
+    padding-right: 156px;
+  }
 }

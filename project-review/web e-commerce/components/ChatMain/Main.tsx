@@ -7,86 +7,36 @@
 
 import React from 'react';
 import { MaxRoom, CommonRoom, MinRoom } from './Room';
-import { sendImageMessage, getRoomHistory } from '../../api/chat';
 import _get from '../../common/get';
-import { AppStore } from '../../store/reducers';
-import { UserInfoStore } from '../../store/types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { sendImageMessage, getRoomHistory } from '../../api/chat';
 import { WebSocketManager } from '../../api/wss';
-import { deleteActiveRoomId, updateActiveRoomId } from '../../store/actions/chat';
+import { AppStore } from '../../store/reducers';
+import { deleteActiveRoomId, updateActiveRoomId, upDateRoomUnread } from '../../store/actions/chat';
 import { UnionChatRouteGoTo } from '../../store/actions/route';
-import { ChatMode, ChatRole } from '../../store/types';
-import { upDateRoomUnread } from '../../store/actions/chat';
-import { TimeMessageType, MessageStatus } from './Message';
-
-interface MessageType {
-  msg_type: number | string;
-  extra: object;
-  messageStatus?: MessageStatus;
-  sender?: {
-    id: string;
-    headshot: string;
-    company_country: string;
-  };
-  id?: string;
-  message_id?: string;
-  [key: string]: any;
-}
-
-const MESSAGE_TIME_OUT = 10000;
-
-const getMessageTime = (last: string) => {
-  if (!last) return false;
-  const originPrev = new Date(Number(last));
-  const prev = originPrev.getTime();
-  const now = Date.now();
-  const dateDiff = now - prev;
-  const minuteDiff = Math.floor(dateDiff / (60 * 1000));
-  if (!Number.isInteger(minuteDiff) || minuteDiff < 11) {
-    return false;
-  }
-  const dayDiff = Math.floor(dateDiff / (24 * 60 * 60 * 1000));
-  const year = `${originPrev.getFullYear()}`;
-  const month = `${originPrev.getMonth() + 1 < 10 ? '0' : ''}${originPrev.getMonth() + 1}`;
-  const day = `${originPrev.getDate() < 10 ? '0' : ''}${originPrev.getDate()}`;
-  const hour = `${originPrev.getHours() < 10 ? '0' : ''}${originPrev.getHours()}`;
-  const minute = `${originPrev.getMinutes() < 10 ? '0' : ''}${originPrev.getMinutes()}`;
-  if (dayDiff <= 1) {
-    return `${hour}:${minute}`;
-  }
-  if (dayDiff <= 2) {
-    return `yesterday ${hour}:${minute}`;
-  }
-  if (dayDiff <= 365) {
-    return `${month}-${day} ${hour}:${minute}`;
-  }
-  return `${year}-${month}-${day} ${hour}:${minute}`;
-};
-
-function uniqueID() {
-  function chr4() {
-    return Math.random()
-      .toString(16)
-      .slice(-4);
-  }
-  return (
-    chr4() + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + chr4() + chr4()
-  );
-}
-
-export type RoomType = 'max' | 'min' | 'common';
+import { ChatMode, ChatRole, UserInfoStore } from '../../store/types';
+import {
+  MessageProps,
+  TimeMessageType,
+  uniqueID,
+  RoomStatus,
+  SEND_MESSAGE_TIMEOUT,
+  getMessageTime,
+  RoomPageSize,
+  base64ToBlob
+} from './common';
+import { Notification } from '../Notification';
 
 interface ContainerProps {
   id: string;
-  type?: RoomType;
+  type: RoomStatus;
   user: UserInfoStore;
-  dispatch: any;
-  onMaxRoomClose?: any;
   maxRoom: (id: string, categoryId: string, activeRole: ChatRole) => any;
   updateActiveRoomId: (id: string, status: 'common' | 'min') => any;
   deleteActiveRoomId: (id: string) => any;
   refreshUnread: (id: string, activeRole: ChatRole) => any;
+  onMaxRoomClose?: any;
 
   activeRole: ChatRole;
   categoryId: string;
@@ -96,7 +46,7 @@ interface ContainerState {
   count: number;
   next: string;
   previous: string;
-  results: MessageType[];
+  results: MessageProps[];
   server_time: string;
   status: string;
   chatroom: any;
@@ -118,7 +68,7 @@ const initialState = {
 
   // handle change
   page: 1,
-  pageSize: 10,
+  pageSize: RoomPageSize,
   loading: false,
   targetId: ''
 };
@@ -187,16 +137,26 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         });
       }
     } catch (error) {
-      console.log('getRoomHistoryError: ', error);
+      Notification({
+        type: 'error',
+        message: 'upload image error',
+        description: _get(error, ['response', 'data', 'message'] || '')
+      });
     } finally {
       this.setState({ loading: false });
     }
   };
 
   onRoomMessage = (data: any) => {
-    console.log('onMessageFromServer: ', data);
-    if (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) {
+    console.log('on_message_from_server: ', data);
+    if (
+      (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) ||
+      (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url']))
+    ) {
       const receive_message_id = _get(data, ['message_id']);
+      if (!receive_message_id) {
+        return this.setState(prev => ({ results: prev.results.concat(data) }));
+      }
       this.setState(prev => {
         const nextResults = prev.results.slice();
         for (let i = nextResults.length - 1; i > 0; i--) {
@@ -212,9 +172,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         return { results: nextResults };
       });
     }
-    if (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url'])) {
-      this.setState(prev => ({ results: prev.results.concat(data) }));
-    }
+    
     if (_get(data, ['msg_type']) === 6) {
       this.setState(prev => ({ results: prev.results.concat(data) }));
     }
@@ -254,7 +212,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       this.setState({ ...initialState }, () => this.initialRoom());
     }
 
-    // before latest message exceed 10 minutes
+    // before latest message exceed 10 minutes shot time stamp
     if (prevProps.id === this.props.id && prevState.results.length < this.state.results.length) {
       const _res = this.state.results;
       const latest = _res.slice(-1)[0];
@@ -285,37 +243,68 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         }
       }
       this.setState({ results: next });
-    }, MESSAGE_TIME_OUT);
+    }, SEND_MESSAGE_TIMEOUT);
   };
 
-  sendImageMessage = async (data: FormData) => {
+  sendImageMessage = async (data: FormData, base64Image: string, uuid: string) => {
     try {
       if (!this.props.id) return;
       this.setState({ loading: true });
+      if (base64Image) {
+        const _message = this.getMessageTemplate({
+          type: 'image',
+          url: base64Image,
+          id: uuid
+        });
+        this.setState(
+          prev => ({ results: prev.results.concat(_message) }),
+          () => this.checkMessage(uuid)
+        );
+      }
       await sendImageMessage(this.props.id, data);
     } catch (e) {
-      console.log('upload image error: ', e.response);
+      Notification({
+        type: 'error',
+        message: 'upload image error',
+        description: _get(e, ['response', 'data', 'message'] || e || '')
+      });
     } finally {
       this.setState({ loading: false });
     }
   };
 
-  getTextMessageTemplate = (text: string, id: string): MessageType => {
+  getMessageTemplate = ({
+    text,
+    url,
+    id,
+    type
+  }: {
+    text?: string;
+    url?: string;
+    id: string;
+    type: 'text' | 'image';
+  }): MessageProps => {
     const {
       userInfo: { userId, headshot, company_country }
     } = this.props.user;
+    const types = {
+      text: 1,
+      image: 2
+    };
     return {
-      msg_type: 1,
+      msg_type: types[type],
       messageStatus: 'pending',
       extra: {
-        content: text
+        content: type === 'text' ? text : '',
+        url: type === 'image' ? url : ''
       },
       sender: {
         id: userId,
         headshot: headshot,
         company_country: company_country
       },
-      message_id: id
+      message_id: id,
+      isFromHistory: false
     };
   };
 
@@ -328,13 +317,19 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         this.ROOM.send({ message: text, message_id });
         this.setState(
           prev => ({
-            results: prev.results.concat(this.getTextMessageTemplate(text, message_id))
+            results: prev.results.concat(
+              this.getMessageTemplate({ text, id: message_id, type: 'text' })
+            )
           }),
           () => this.checkMessage(message_id)
         );
       }
     } catch (e) {
-      console.log('send text error: ', e);
+      Notification({
+        type: 'error',
+        message: 'Send text error',
+        description: _get(e, ['response', 'data', 'message'] || e || '')
+      });
     } finally {
       this.setState({ loading: false });
     }
@@ -365,7 +360,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     }
   };
 
-  resendMessage = (message: any) => (e: React.MouseEvent<HTMLDivElement>) => {
+  resendMessage = (message: MessageProps) => (e: React.MouseEvent<HTMLDivElement>) => {
     let targetMessage: any;
     this.setState(
       prev => {
@@ -378,7 +373,20 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
           results: next
         };
       },
-      () => this.sendTextMessage(_get(targetMessage, ['extra', 'content']))
+      async () => {
+        if (targetMessage.msg_type === 1) {
+          this.sendTextMessage(_get(targetMessage, ['extra', 'content']));
+        }
+        if (targetMessage.msg_type === 2) {
+          const base64Image = _get(targetMessage, ['extra', 'url']);
+          const blobImage = await base64ToBlob(base64Image);
+          const uuid = uniqueID();
+          const data = new FormData();
+          data.append('image', blobImage);
+          data.append('message_id', uuid);
+          this.sendImageMessage(data, base64Image, uuid);
+        }
+      }
     );
   };
 
@@ -409,7 +417,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     const targetActive =
       _get(target, ['last_time_online']) || _get(chatroom, ['opposite', 'last_time_online']);
     const targetLocalTime =
-      _get(target, ['local_timezone']) || _get(chatroom, ['opposite', 'local_timezone']);
+      _get(target, ['local_time']) || _get(chatroom, ['opposite', 'local_time']);
     const targetLocale =
       _get(target, ['company_country']) || _get(chatroom, ['opposite', 'company_country']);
 

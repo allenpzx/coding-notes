@@ -284,12 +284,6 @@
   }
 }
 
-// .contentWrap {
-//   position: relative;
-//   max-width: calc(100% - 50px - 20px);
-//   height: auto;
-// }
-
 .text_left {
   justify-content: flex-end;
   .user {
@@ -329,6 +323,7 @@
 
 .message_image {
   width: 100%;
+  height: auto;
   max-width: 340px;
   max-height: 255px;
   position: relative;
@@ -337,6 +332,46 @@
   border: solid 1px #ebebeb;
   object-fit: cover;
   cursor: pointer;
+}
+
+.image {
+  &_loading,
+  &_error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 340px;
+    max-height: 255px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+.error_wrap {
+  width: 104px;
+  height: 64px;
+  border-radius: 4px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  i,
+  svg {
+    color: red;
+    width: 22px;
+    height: 22px;
+  }
 }
 
 .message_offer_success {

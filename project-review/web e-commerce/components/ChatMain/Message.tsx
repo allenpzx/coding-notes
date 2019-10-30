@@ -8,12 +8,8 @@
 import React, { useState } from 'react';
 import IconFont from '../ui/TradexIcon';
 import Mask from '../feedback/Mask';
+import { MessageStatus } from './common';
 import styles from './Message.module.scss';
-
-export const CarMessageType = 'carMessage';
-export const TimeMessageType = 'timeMessage';
-
-export type MessageStatus = 'pending' | 'success' | 'error';
 
 interface TimeMessageProps {
   time: string;
@@ -149,20 +145,23 @@ export const TextMessage: React.SFC<TextMessageProps> = ({
 
 interface ImageMessageProps extends User {
   url: string;
-  // title: string;
   bubblePosition: positionType;
-  onLoad?: any;
+  onLoad: any;
+  messageStatus: 'pending' | 'success' | 'error';
+  resendMessage: any;
 }
 
 export const ImageMessage: React.SFC<ImageMessageProps> = ({
   url,
-  // title,
   bubblePosition,
   headshot,
   location,
-  onLoad
+  onLoad,
+  messageStatus,
+  resendMessage
 }) => {
   const [preview, setPreview] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   return (
     <div
       className={`${styles.message_text} ${
@@ -170,7 +169,27 @@ export const ImageMessage: React.SFC<ImageMessageProps> = ({
       }`}
     >
       <div className={styles.contentWrap} onClick={() => setPreview(true)}>
-        <img src={url} className={styles.message_image} onLoad={onLoad ? onLoad : ''} />
+        <img
+          src={url}
+          className={styles.message_image}
+          style={loaded ? {} : { width: 225, height: 340 }}
+          onLoad={() => {
+            setLoaded(true);
+            onLoad();
+          }}
+        />
+        {messageStatus === 'pending' && (
+          <div className={styles.image_loading}>
+            <img src={require('../../assets/img/loading.gif')} />
+          </div>
+        )}
+        {messageStatus === 'error' && (
+          <div className={`${styles.image_error}`} onClick={resendMessage}>
+            <div className={styles.error_wrap}>
+              <IconFont type="iconicon_warning" />
+            </div>
+          </div>
+        )}
       </div>
       <div className={styles.user}>
         <img className={styles.headshot} src={headshot} />

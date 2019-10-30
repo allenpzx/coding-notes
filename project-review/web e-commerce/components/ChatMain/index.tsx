@@ -8,8 +8,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { AppStore } from '../../store/reducers';
-import Main from './Main';
 import { RoomItem, ChatStore, ChatMode } from '../../store/types';
+import Main from './Main';
 import styles from './index.module.scss';
 
 interface ContainerProps {
