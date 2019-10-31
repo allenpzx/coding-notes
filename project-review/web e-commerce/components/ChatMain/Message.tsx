@@ -5,11 +5,11 @@
  * @author zixiu
  */
 
-import React, { useState } from 'react';
-import IconFont from '../ui/TradexIcon';
-import Mask from '../feedback/Mask';
-import { MessageStatus } from './common';
-import styles from './Message.module.scss';
+import React, { useState } from "react";
+import IconFont from "../ui/TradexIcon";
+import Mask from "../feedback/Mask";
+import { MessageStatus } from "./common";
+import styles from "./Message.module.scss";
 
 interface TimeMessageProps {
   time: string;
@@ -49,12 +49,18 @@ export const CarMessage: React.SFC<CarMessageProps> = ({
       <div className={styles.infoArea}>
         <div className={styles.carName}>{carName}</div>
         <div className={styles.carStatus}>
-          {carStatus === 1 && orderType !== 2 && <span className={styles.instock}>IN STOCK</span>}
-          {carStatus === 2 && orderType !== 2 && <span className={styles.incoming}>INCOMING</span>}
-          {orderType === 2 && <span className={styles.instant_max}>INSTANT REQUEST</span>}
+          {carStatus === 1 && orderType !== 2 && (
+            <span className={styles.instock}>IN STOCK</span>
+          )}
+          {carStatus === 2 && orderType !== 2 && (
+            <span className={styles.incoming}>INCOMING</span>
+          )}
+          {orderType === 2 && (
+            <span className={styles.instant_max}>INSTANT REQUEST</span>
+          )}
           <span className={styles.carUnit}>
             <span className={styles.number}>{carUnit}</span>
-            {carUnit > 1 ? 'UNITS' : 'UNIT'}
+            {carUnit > 1 ? "UNITS" : "UNIT"}
           </span>
         </div>
         <div className={styles.carMileage}>
@@ -76,8 +82,8 @@ interface User {
   location: string;
 }
 
-type positionType = 'left' | 'right';
-type colorType = 'white' | 'blue';
+type positionType = "left" | "right";
+type colorType = "white" | "blue";
 interface BubbleProps {
   text: string;
   position: positionType;
@@ -88,9 +94,9 @@ export const Bubble: React.SFC<BubbleProps> = ({ text, position, color }) => {
   return (
     <div
       className={`${styles.bubble} ${
-        position === 'left' ? styles.bubble_left : styles.bubble_right
-      } ${color === 'white' ? styles.bubble_white : ''} ${
-        color === 'blue' ? styles.bubble_blue : ''
+        position === "left" ? styles.bubble_left : styles.bubble_right
+      } ${color === "white" ? styles.bubble_white : ""} ${
+        color === "blue" ? styles.bubble_blue : ""
       }
       `}
     >
@@ -119,16 +125,19 @@ export const TextMessage: React.SFC<TextMessageProps> = ({
   return (
     <div
       className={`${styles.message_text} ${
-        bubblePosition === 'left' ? styles.text_left : styles.text_right
+        bubblePosition === "left" ? styles.text_left : styles.text_right
       }`}
     >
-      {messageStatus === 'pending' && (
+      {messageStatus === "pending" && (
         <div className={styles.message_status}>
-          <img src={require('../../assets/img/loading.gif')} />
+          <img src={require("../../assets/img/loading.gif")} />
         </div>
       )}
-      {messageStatus === 'error' && (
-        <div className={`${styles.message_status} ${styles.resend}`} onClick={resendMessage}>
+      {messageStatus === "error" && (
+        <div
+          className={`${styles.message_status} ${styles.resend}`}
+          onClick={resendMessage}
+        >
           <IconFont type="iconicon_warning" />
         </div>
       )}
@@ -137,7 +146,10 @@ export const TextMessage: React.SFC<TextMessageProps> = ({
       </div>
       <div className={styles.user}>
         <img className={styles.headshot} src={headshot} />
-        <img className={styles.location} src={require(`../../assets/img/flag/${location}.png`)} />
+        <img
+          className={styles.location}
+          src={require(`../../assets/img/flag/${location}.png`)}
+        />
       </div>
     </div>
   );
@@ -147,7 +159,7 @@ interface ImageMessageProps extends User {
   url: string;
   bubblePosition: positionType;
   onLoad: any;
-  messageStatus: 'pending' | 'success' | 'error';
+  messageStatus: "pending" | "success" | "error";
   resendMessage: any;
 }
 
@@ -165,7 +177,7 @@ export const ImageMessage: React.SFC<ImageMessageProps> = ({
   return (
     <div
       className={`${styles.message_text} ${
-        bubblePosition === 'left' ? styles.text_left : styles.text_right
+        bubblePosition === "left" ? styles.text_left : styles.text_right
       }`}
     >
       <div className={styles.contentWrap} onClick={() => setPreview(true)}>
@@ -174,16 +186,16 @@ export const ImageMessage: React.SFC<ImageMessageProps> = ({
           className={styles.message_image}
           style={loaded ? {} : { width: 225, height: 340 }}
           onLoad={() => {
-            setLoaded(true);
             onLoad();
+            setLoaded(true);
           }}
         />
-        {messageStatus === 'pending' && (
+        {messageStatus === "pending" && (
           <div className={styles.image_loading}>
-            <img src={require('../../assets/img/loading.gif')} />
+            <img src={require("../../assets/img/loading.gif")} />
           </div>
         )}
-        {messageStatus === 'error' && (
+        {messageStatus === "error" && (
           <div className={`${styles.image_error}`} onClick={resendMessage}>
             <div className={styles.error_wrap}>
               <IconFont type="iconicon_warning" />
@@ -193,12 +205,19 @@ export const ImageMessage: React.SFC<ImageMessageProps> = ({
       </div>
       <div className={styles.user}>
         <img className={styles.headshot} src={headshot} />
-        <img className={styles.location} src={require(`../../assets/img/flag/${location}.png`)} />
+        <img
+          className={styles.location}
+          src={require(`../../assets/img/flag/${location}.png`)}
+        />
       </div>
 
       {preview && (
-        <Mask onClose={() => setPreview(false)} title={''}>
-          <img style={{ objectFit: 'cover', width: '100%', height: '100%' }} src={url} alt="" />
+        <Mask onClose={() => setPreview(false)} title={""}>
+          <img
+            style={{ objectFit: "cover", width: "100%", height: "100%" }}
+            src={url}
+            alt=""
+          />
         </Mask>
       )}
     </div>
@@ -209,7 +228,7 @@ interface OfferMessageProps {
   headshot: string;
   location?: string;
   children: React.ReactChild;
-  bubblePosition: 'left' | 'right';
+  bubblePosition: "left" | "right";
   hideAvatar: boolean;
 }
 
@@ -223,14 +242,17 @@ export const OfferMessage: React.SFC<OfferMessageProps> = ({
   return (
     <div
       className={`${styles.message_text} ${
-        bubblePosition === 'left' ? styles.text_left : styles.text_right
+        bubblePosition === "left" ? styles.text_left : styles.text_right
       }`}
     >
       <div className={styles.contentWrap}>{children}</div>
       <div className={styles.user} style={{ opacity: hideAvatar ? 0 : 1 }}>
         <img className={styles.headshot} src={headshot} />
         {location && (
-          <img className={styles.location} src={require(`../../assets/img/flag/${location}.png`)} />
+          <img
+            className={styles.location}
+            src={require(`../../assets/img/flag/${location}.png`)}
+          />
         )}
       </div>
     </div>

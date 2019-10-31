@@ -5,12 +5,12 @@
  * @author zixiu
  */
 
-import React, { ReactNode } from 'react';
-import IconFont from '../ui/TradexIcon';
-import _get from '../../common/get';
-import { UserInfoStore } from '../../store/types';
-import { FormattedTime } from 'react-intl';
-import { Spin } from 'antd';
+import React, { ReactNode, useState } from "react";
+import IconFont from "../ui/TradexIcon";
+import _get from "../../common/get";
+import { UserInfoStore } from "../../store/types";
+import { FormattedTime } from "react-intl";
+import { Spin } from "antd";
 import {
   CarMessage,
   TextMessage,
@@ -18,20 +18,32 @@ import {
   ImageMessage,
   OfferSuccess,
   TimeMessage
-} from './Message';
-import OfferBubble from '../OfferBubble';
-import { format } from 'timeago.js';
-import util from '../../common/util';
-import { CarMessageType, TimeMessageType, RoomStatus, MessageProps, uniqueID } from './common';
-import { Notification } from '../Notification';
-import styles from './Room.module.scss';
+} from "./Message";
+import OfferBubble from "../OfferBubble";
+import { format } from "timeago.js";
+import util from "../../common/util";
+import {
+  CarMessageType,
+  TimeMessageType,
+  RoomStatus,
+  MessageProps,
+  uniqueID,
+  TSendTextMessage,
+  TSendImageMessage,
+  TReSendMessage,
+  TChangRoomStatus,
+  TCloseRoom,
+  TOnPageChange
+} from "./common";
+import { Notification } from "../Notification";
+import styles from "./Room.module.scss";
 
-const upload_image_type = 'image/png, image/jpeg, image/jpg';
+const upload_image_type = "image/png, image/jpeg, image/jpg";
 interface BasicProps {
   results: MessageProps[];
   loading: boolean;
-  onPageChange: any;
-  textMessage: any;
+  onPageChange: TOnPageChange;
+  textMessage: TSendTextMessage;
   imageMessage: any;
 }
 
@@ -43,7 +55,7 @@ class BasicRoom<P, S> extends React.Component<BasicProps & P, BasicState> {
   protected inputArea = React.createRef<HTMLTextAreaElement>();
 
   state = {
-    inputContent: ''
+    inputContent: ""
   };
 
   detectScroll = (e: any) => {
@@ -53,12 +65,18 @@ class BasicRoom<P, S> extends React.Component<BasicProps & P, BasicState> {
 
   detectRoomScroll = () => {
     this.main.current &&
-      this.main.current.addEventListener('scroll', throttle(this.detectScroll, 300, {}));
+      this.main.current.addEventListener(
+        "scroll",
+        throttle(this.detectScroll, 300, {})
+      );
   };
 
   undetectRoomScroll = () => {
     this.main.current &&
-      this.main.current.removeEventListener('scroll', throttle(this.detectScroll, 300, {}));
+      this.main.current.removeEventListener(
+        "scroll",
+        throttle(this.detectScroll, 300, {})
+      );
   };
 
   scrollToBottom = () => this.main.current && scrollToBottom(this.main.current);
@@ -69,7 +87,7 @@ class BasicRoom<P, S> extends React.Component<BasicProps & P, BasicState> {
     if (e.keyCode === 13) {
       e.preventDefault();
       this.props.textMessage(this.state.inputContent);
-      this.setState({ inputContent: '' });
+      this.setState({ inputContent: "" });
     }
   };
 
@@ -79,23 +97,23 @@ class BasicRoom<P, S> extends React.Component<BasicProps & P, BasicState> {
   onImageMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       e.persist();
-      const files = _get(e, ['target', 'files']);
+      const files = _get(e, ["target", "files"]);
       const reader = new FileReader();
       reader.onload = async (event: any) => {
         const base64Image = event.target.result;
         const formData = new FormData();
         const uuid = uniqueID();
-        formData.append('image', files[0]);
-        formData.append('message_id', uuid);
+        formData.append("image", files[0]);
+        formData.append("message_id", uuid);
         this.props.imageMessage(formData, base64Image, uuid);
-        e.target.value = '';
+        e.target.value = "";
       };
       reader.readAsDataURL(files[0]);
     } catch (e) {
       Notification({
-        type: 'error',
-        message: 'Upload image error',
-        description: _get(e, ['response', 'data', 'message']) || ''
+        type: "error",
+        message: "Upload image error",
+        description: _get(e, ["response", "data", "message"]) || ""
       });
     }
   };
@@ -117,31 +135,16 @@ class BasicRoom<P, S> extends React.Component<BasicProps & P, BasicState> {
     const latest = this.props.results.slice(-1)[0];
     if (
       prevProps.results.length < this.props.results.length &&
-      (_get(beforeLatest, ['id']) !== _get(latest, ['id']) ||
-        _get(beforeLatest, ['message_id']) !== _get(latest, ['message_id']))
+      (_get(beforeLatest, ["id"]) !== _get(latest, ["id"]) ||
+        _get(beforeLatest, ["message_id"]) !== _get(latest, ["message_id"]))
     ) {
       this.scrollToBottom();
     }
   }
 }
 
-const generateMessages = ({
-  results,
-  userId,
-  chatroom,
-  resendMessage,
-  scrollToBottom,
-  roomType,
-  carImage,
-  carMakeLogo,
-  carMileage,
-  carMileageUnit,
-  carName,
-  carUnit,
-  carStatus,
-  orderType
-}: {
-  results: MessageProps[];
+interface GenerateMessagesProps {
+  results: any;
   userId: string;
   resendMessage: any;
   chatroom: any;
@@ -156,18 +159,46 @@ const generateMessages = ({
   carUnit?: number;
   carStatus?: number;
   orderType?: number;
-}): ReactNode => {
-  return results.map((v: any, index: number, arr: any[]) => {
+}
+
+const GenerateMessages: React.SFC<GenerateMessagesProps> = ({
+  results,
+  userId,
+  chatroom,
+  resendMessage,
+  scrollToBottom,
+  roomType,
+  carImage,
+  carMakeLogo,
+  carMileage,
+  carMileageUnit,
+  carName,
+  carUnit,
+  carStatus,
+  orderType
+}) => {
+  const [ids, setIds] = useState([]);
+
+  return results.map((v: any, index: number) => {
     const bubblePosition =
-      roomType === 'max' ? (_get(v, ['sender', 'id']) === userId ? 'left' : 'right') : 'right';
-    const bubbleColor = roomType === 'common' ? 'blue' : undefined;
+      roomType === "max"
+        ? _get(v, ["sender", "id"]) === userId
+          ? "left"
+          : "right"
+        : "right";
+    const bubbleColor =
+      roomType === "common"
+        ? _get(v, ["sender", "id"]) === userId
+          ? "blue"
+          : "white"
+        : undefined;
 
     if (v.msg_type === TimeMessageType) {
-      return <TimeMessage key={index} time={_get(v, ['extra', 'content'])} />;
+      return <TimeMessage key={index} time={_get(v, ["extra", "content"])} />;
     }
     // 特殊的卡片位置
     if (
-      roomType === 'max' &&
+      roomType === "max" &&
       carName &&
       carMileage &&
       carMileageUnit &&
@@ -179,7 +210,7 @@ const generateMessages = ({
       return (
         <CarMessage
           key={index}
-          carImage={carImage || ''}
+          carImage={carImage || ""}
           carMakeLogo={carMakeLogo}
           carName={carName}
           carMileage={carMileage}
@@ -196,13 +227,13 @@ const generateMessages = ({
       return (
         <TextMessage
           key={index}
-          content={_get(v, ['extra', 'content'])}
-          headshot={_get(v, ['sender', 'headshot'])}
-          location={_get(v, ['sender', 'company_country'])}
+          content={_get(v, ["extra", "content"])}
+          headshot={_get(v, ["sender", "headshot"])}
+          location={_get(v, ["sender", "company_country"])}
           bubblePosition={bubblePosition}
           bubbleColor={bubbleColor}
           resendMessage={resendMessage(v)}
-          messageStatus={_get(v, ['messageStatus'])}
+          messageStatus={_get(v, ["messageStatus"])}
         />
       );
     }
@@ -212,12 +243,20 @@ const generateMessages = ({
       return (
         <ImageMessage
           key={index}
-          url={_get(v, ['extra', 'url'])}
-          headshot={_get(v, ['sender', 'headshot'])}
-          location={_get(v, ['sender', 'company_country'])}
-          onLoad={() => !v.isFromHistory && scrollToBottom()}
+          url={_get(v, ["extra", "url"])}
+          headshot={_get(v, ["sender", "headshot"])}
+          location={_get(v, ["sender", "company_country"])}
+          onLoad={() => {
+            if (
+              !v.isFromHistory &&
+              !ids.find(id => id === v.id || id === v.message_id)
+            ) {
+              scrollToBottom();
+              setIds(ids.concat(v.id || v.message_id));
+            }
+          }}
           bubblePosition={bubblePosition}
-          messageStatus={_get(v, ['messageStatus'])}
+          messageStatus={_get(v, ["messageStatus"])}
           resendMessage={resendMessage(v)}
         />
       );
@@ -228,8 +267,8 @@ const generateMessages = ({
       return (
         <OfferMessage
           key={index}
-          headshot={_get(v, ['sender', 'headshot'])}
-          location={_get(v, ['sender', 'company_country'])}
+          headshot={_get(v, ["sender", "headshot"])}
+          location={_get(v, ["sender", "company_country"])}
           children={<OfferBubble chatroom={chatroom} result={v} />}
           bubblePosition={bubblePosition}
           hideAvatar={false}
@@ -242,9 +281,9 @@ const generateMessages = ({
       return (
         <OfferMessage
           key={index}
-          headshot={require('../../assets/img/chat_system_avatar.png')}
-          children={<OfferSuccess text={_get(v, ['extra', 'content'])} />}
-          bubblePosition={roomType === 'max' ? 'left' : 'right'}
+          headshot={require("../../assets/img/chat_system_avatar.png")}
+          children={<OfferSuccess text={_get(v, ["extra", "content"])} />}
+          bubblePosition={roomType === "max" ? "left" : "right"}
           hideAvatar={false}
         />
       );
@@ -253,14 +292,13 @@ const generateMessages = ({
 };
 
 function scrollToBottom(el: Element): void {
-  el && el.scroll({ top: 9999, behavior: 'smooth' });
+  el && el.scroll({ top: 9999, behavior: "smooth" });
 }
 
 function requireF(targetLocale: string, cb?: (...args: any) => any) {
   try {
     return require(`../../assets/img/flag/${targetLocale}.png`);
   } catch (e) {
-    console.log('requireF(): The file "' + targetLocale + '".png could not be loaded.', e);
     cb && cb();
     return false;
   }
@@ -299,29 +337,34 @@ function throttle(func: any, wait: number, options: any) {
 }
 
 interface LoadingProps {
-  type?: 'common';
+  type?: "common";
 }
 
 const ChatLoading: React.SFC<LoadingProps> = ({ type }) => (
-  <div className={`${styles.chatLoading} ${type === 'common' ? styles.chatLoading_common : ''}`}>
+  <div
+    className={`${styles.chatLoading} ${
+      type === "common" ? styles.chatLoading_common : ""
+    }`}
+  >
     <Spin />
   </div>
 );
 
-const getJoined = (date: string, locale: string): ReactNode => format(date, locale);
+const getJoined = (date: string, locale: string): ReactNode =>
+  format(date, locale);
 
-const getLocal = (localTime: string): ReactNode => <FormattedTime value={localTime} />;
+const getLocal = (localTime: string): ReactNode => (
+  <FormattedTime value={localTime} />
+);
 
-interface MaxRoomProps extends React.SFC {
+interface MaxRoomProps {
   id: string;
   chatroom: object;
-
   targetName: string;
   targetJoined: string;
   targetTotalTrad: number;
   targetActive: string;
   targetLocalTime: string;
-
   carImage: string;
   carMakeLogo: string;
   carName: string;
@@ -329,27 +372,18 @@ interface MaxRoomProps extends React.SFC {
   carStatus: number;
   carUnit: number;
   carMileageUnit: string;
-
   orderType: number;
-
   results: MessageProps[];
   loading: boolean;
-
   user: UserInfoStore;
-
-  imageMessage: (data: FormData) => any;
-  textMessage: (text: string) => any;
-  onClose: () => any;
-  onPageChange: () => any;
-  resendMessage: any;
+  imageMessage: TSendImageMessage;
+  textMessage: TSendTextMessage;
+  onClose: TCloseRoom;
+  onPageChange: TOnPageChange;
+  resendMessage: TReSendMessage;
 }
 
-interface MaxRoomState {
-  inputContent: string;
-}
-
-export class MaxRoom extends BasicRoom<MaxRoomProps, MaxRoomState> {
-
+export class MaxRoom extends BasicRoom<MaxRoomProps, {}> {
   onMaxRoomClose = (e: React.KeyboardEvent) => {
     e.preventDefault();
     this.props.onClose();
@@ -357,9 +391,7 @@ export class MaxRoom extends BasicRoom<MaxRoomProps, MaxRoomState> {
 
   render() {
     const {
-      id,
       chatroom,
-
       targetName,
       targetJoined,
       targetTotalTrad,
@@ -367,7 +399,6 @@ export class MaxRoom extends BasicRoom<MaxRoomProps, MaxRoomState> {
       targetLocalTime,
       results,
       orderType,
-
       carImage,
       carMakeLogo,
       carName,
@@ -391,7 +422,9 @@ export class MaxRoom extends BasicRoom<MaxRoomProps, MaxRoomState> {
             <div className={styles.header_max_row2}>
               <div className={styles.tagGroup}>
                 <span className={styles.label}>Joined:</span>
-                <span className={styles.value}>{getJoined(targetJoined, company_country)}</span>
+                <span className={styles.value}>
+                  {getJoined(targetJoined, company_country)}
+                </span>
               </div>
               <div className={styles.tagGroup}>
                 <span className={styles.label}>Total traded cars:</span>
@@ -417,22 +450,22 @@ export class MaxRoom extends BasicRoom<MaxRoomProps, MaxRoomState> {
         </header>
 
         <div className={styles.main_max} ref={this.main}>
-          {generateMessages({
-            roomType: 'max',
-            carImage,
-            carMakeLogo,
-            carMileage,
-            carMileageUnit,
-            carName,
-            carUnit,
-            carStatus,
-            orderType,
-            results,
-            userId,
-            chatroom,
-            resendMessage,
-            scrollToBottom: () => this.scrollToBottom()
-          })}
+          <GenerateMessages
+            roomType={"max"}
+            carImage={carImage}
+            carMakeLogo={carMakeLogo}
+            carMileage={carMileage}
+            carMileageUnit={carMileageUnit}
+            carName={carName}
+            carUnit={carUnit}
+            carStatus={carStatus}
+            orderType={orderType}
+            results={results}
+            userId={userId}
+            chatroom={chatroom}
+            resendMessage={resendMessage}
+            scrollToBottom={() => this.scrollToBottom()}
+          />
         </div>
         {loading && <ChatLoading />}
         <footer className={styles.footer_max}>
@@ -461,46 +494,34 @@ export class MaxRoom extends BasicRoom<MaxRoomProps, MaxRoomState> {
   }
 }
 
-interface CommonRoomProps extends React.SFC {
+interface CommonRoomProps {
   id: string;
   chatroom: object;
-
   targetHeadshot: string;
   targetLocale: string;
   targetName: string;
   targetActive: string;
   targetLocalTime: string;
-
   carName: string;
   carMileage: number | null;
   carStatus: number | null;
   carMileageUnit: string;
-
   orderType: number | null;
-
   results: MessageProps[];
   loading: boolean;
-
   user: UserInfoStore;
 
-  // imageMessage: (e: React.ChangeEvent<HTMLInputElement>) => any;
-  imageMessage: any;
-  textMessage: (text: string) => any;
-  changRoomStatus: (nextStatus?: RoomStatus) => any;
-  closeRoom: () => any;
-  // maxRoom: () => any;
-  onPageChange: () => any;
-  resendMessage: any;
+  imageMessage: TSendImageMessage;
+  textMessage: TSendTextMessage;
+  changRoomStatus: TChangRoomStatus;
+  closeRoom: TCloseRoom;
+  onPageChange: TOnPageChange;
+  resendMessage: TReSendMessage;
 }
 
-interface CommonRoomState {
-  inputContent: string;
-}
-
-export class CommonRoom extends BasicRoom<CommonRoomProps, CommonRoomState> {
+export class CommonRoom extends BasicRoom<CommonRoomProps, {}> {
   render() {
     const {
-      id,
       chatroom,
 
       targetHeadshot,
@@ -523,15 +544,17 @@ export class CommonRoom extends BasicRoom<CommonRoomProps, CommonRoomState> {
       },
       changRoomStatus,
       closeRoom,
-      imageMessage,
       resendMessage
-      // maxRoom
     } = this.props;
     const { inputContent } = this.state;
     const randomId = uniqueID();
+
     return (
       <article className={styles.container_common}>
-        <header className={styles.header_common} onClick={() => changRoomStatus()}>
+        <header
+          className={styles.header_common}
+          onClick={() => changRoomStatus()}
+        >
           {targetHeadshot && (
             <div className={styles.user}>
               <img src={targetHeadshot} className={styles.headshot} />
@@ -551,7 +574,9 @@ export class CommonRoom extends BasicRoom<CommonRoomProps, CommonRoomState> {
 
                 <div className={styles.info}>
                   <span className={styles.label}>Local Time:</span>
-                  <span className={styles.value}>{getLocal(targetLocalTime)}</span>
+                  <span className={styles.value}>
+                    {getLocal(targetLocalTime)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -572,28 +597,34 @@ export class CommonRoom extends BasicRoom<CommonRoomProps, CommonRoomState> {
         <div className={styles.carInfo}>
           <div className={styles.carName}>{carName}</div>
           <div className={styles.carStatus}>
-            {carMileageUnit && <IconFont type="iconicon_mileage_area" className={styles.icon} />}
+            {carMileageUnit && (
+              <IconFont type="iconicon_mileage_area" className={styles.icon} />
+            )}
             <span className={styles.mileage}>
               {carMileage}
               {carMileageUnit}
             </span>
-            {carStatus === 1 && orderType !== 2 && <span className={styles.instock}>IN STOCK</span>}
+            {carStatus === 1 && orderType !== 2 && (
+              <span className={styles.instock}>IN STOCK</span>
+            )}
             {carStatus === 2 && orderType !== 2 && (
               <span className={styles.incoming}>INCOMING</span>
             )}
-            {orderType === 2 && <span className={styles.instant}>INSTANT REQUEST</span>}
+            {orderType === 2 && (
+              <span className={styles.instant}>INSTANT REQUEST</span>
+            )}
           </div>
         </div>
 
         <div className={styles.main_common} ref={this.main}>
-          {generateMessages({
-            roomType: 'common',
-            results,
-            userId,
-            chatroom,
-            resendMessage,
-            scrollToBottom: () => this.scrollToBottom()
-          })}
+          <GenerateMessages
+            roomType={"common"}
+            results={results}
+            userId={userId}
+            chatroom={chatroom}
+            resendMessage={resendMessage}
+            scrollToBottom={() => this.scrollToBottom()}
+          />
         </div>
         {loading && <ChatLoading type="common" />}
         <footer className={styles.footer_common}>
@@ -633,8 +664,8 @@ interface MinRoomProps extends React.SFC {
   targetActive: string;
   targetHeadshot: string;
   orderType: number;
-  changRoomStatus: (nextStatus?: RoomStatus) => any;
-  closeRoom: () => any;
+  changRoomStatus: TChangRoomStatus;
+  closeRoom: TCloseRoom;
 }
 
 export class MinRoom extends React.Component<MinRoomProps, {}> {
@@ -657,7 +688,9 @@ export class MinRoom extends React.Component<MinRoomProps, {}> {
       <article className={styles.container_min}>
         <header className={styles.header_min} onClick={() => changRoomStatus()}>
           <div className={styles.user}>
-            {targetHeadshot && <img src={targetHeadshot} className={styles.headshot} />}
+            {targetHeadshot && (
+              <img src={targetHeadshot} className={styles.headshot} />
+            )}
             {requireF(targetLocale) && (
               <img src={requireF(targetLocale)} className={styles.locale} />
             )}
@@ -689,16 +722,22 @@ export class MinRoom extends React.Component<MinRoomProps, {}> {
         <div className={styles.carInfo_min}>
           <div className={styles.carName}>{carName}</div>
           <div className={styles.carStatus}>
-            {carMileageUnit && <IconFont type="iconicon_mileage_area" className={styles.icon} />}
+            {carMileageUnit && (
+              <IconFont type="iconicon_mileage_area" className={styles.icon} />
+            )}
             <span className={styles.mileage}>
               {carMileage}
               {carMileageUnit}
             </span>
-            {carStatus === 1 && orderType !== 2 && <span className={styles.instock}>INSTOCK</span>}
+            {carStatus === 1 && orderType !== 2 && (
+              <span className={styles.instock}>INSTOCK</span>
+            )}
             {carStatus === 2 && orderType !== 2 && (
               <span className={styles.incoming}>INCOMING</span>
             )}
-            {orderType === 2 && <span className={styles.instant}>INSTANT REQUEST</span>}
+            {orderType === 2 && (
+              <span className={styles.instant}>INSTANT REQUEST</span>
+            )}
           </div>
         </div>
       </article>

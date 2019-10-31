@@ -5,19 +5,19 @@
  * @author zixiu
  */
 
-import React from 'react';
-import { connect } from 'react-redux';
-import { AppStore } from '../../store/reducers';
-import { RoomItem, ChatStore, ChatMode } from '../../store/types';
-import Main from './Main';
-import styles from './index.module.scss';
+import React from "react";
+import { connect } from "react-redux";
+import { AppStore } from "../../store/reducers";
+import { RoomItem, ChatStore, ChatMode } from "../../store/types";
+import Main from "./Main";
+import styles from "./index.module.scss";
 
 interface ContainerProps {
   chat: ChatStore;
   dispatch: any;
   roomId: string;
-  categoryId?: AppStore['route']['params']['WINDOW_MODE']['categoryId'];
-  activeRole?: AppStore['route']['params']['WINDOW_MODE']['activeRole'];
+  categoryId?: AppStore["route"]["params"]["WINDOW_MODE"]["categoryId"];
+  activeRole?: AppStore["route"]["params"]["WINDOW_MODE"]["activeRole"];
 }
 
 class ChatContainer extends React.Component<ContainerProps, {}> {
