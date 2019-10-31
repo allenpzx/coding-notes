@@ -674,3 +674,49 @@ function onClick(event) {
   };
 
 ```
+
+7. 聊天室聊天对象的活动信息开始取值 = onmessage || api
+```javascript
+      const { user, type, id } = this.props;
+    const { targetId, results, chatroom, loading } = this.state;
+
+    const matchTarget = results.find(
+      (v: any) => v.receiver_id === targetId || v.sender_id === targetId
+    );
+
+    const target =
+      _get(matchTarget, ['sender_id']) === targetId
+        ? _get(matchTarget, ['sender'])
+        : _get(matchTarget, ['receiver']);
+
+    const targetName =
+      _get(target, ['display_name']) || _get(chatroom, ['opposite', 'display_name']);
+    const targetHeadshot = _get(target, ['headshot']) || _get(chatroom, ['opposite', 'headshot']);
+    const targetJoined = _get(target, ['created_at']) || _get(chatroom, ['opposite', 'created_at']);
+    const targetTotalTrad =
+      _get(target, ['trade_history', 'cars_sold']) +
+        _get(target, ['trade_history', 'cars_bought']) ||
+      0 ||
+      (_get(chatroom, ['opposite', 'trade_history', 'cars_sold']) +
+        _get(chatroom, ['opposite', 'trade_history', 'cars_bought']) ||
+        0);
+    const targetActive =
+      _get(target, ['last_time_online']) || _get(chatroom, ['opposite', 'last_time_online']);
+    const targetLocalTime =
+      _get(target, ['local_time']) || _get(chatroom, ['opposite', 'local_time']);
+    const targetLocale =
+      _get(target, ['company_country']) || _get(chatroom, ['opposite', 'company_country']);
+
+    // car
+    const carImage = _get(chatroom, ['car_info', 'thumbnail']) || '';
+    const carMakeLogo = _get(chatroom, ['car_info', 'make_logo']) || '';
+    const carName = _get(chatroom, ['car_info', 'name']) || '';
+    const carMileage = _get(chatroom, ['car_info', 'distance_to_warehouse']);
+    const carMileageUnit = _get(chatroom, ['car_info', 'distance_unit', 'display_value']) || '';
+    const carStatus = _get(chatroom, ['car_info', 'car_status']) || -1;
+    const carUnit = _get(chatroom, ['car_info', 'quantity']) || '';
+    const orderType = _get(chatroom, ['order_type']) || -1;
+
+    ...
+    
+```
