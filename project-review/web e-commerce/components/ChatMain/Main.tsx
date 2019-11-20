@@ -5,21 +5,17 @@
  * @author zixiu
  */
 
-import React from "react";
-import { MaxRoom, CommonRoom, MinRoom } from "./Room";
-import _get from "../../common/get";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { sendImageMessage, getRoomHistory } from "../../api/chat";
-import { WebSocketManager } from "../../api/wss";
-import { AppStore } from "../../store/reducers";
-import {
-  deleteActiveRoomId,
-  updateActiveRoomId,
-  upDateRoomUnread
-} from "../../store/actions/chat";
-import { UnionChatRouteGoTo } from "../../store/actions/route";
-import { ChatMode, ChatRole, UserInfoStore } from "../../store/types";
+import React from 'react';
+import { MaxRoom, CommonRoom, MinRoom } from './Room';
+import _get from '../../common/get';
+import { bindActionCreators, compose } from 'redux';
+import { connect } from 'react-redux';
+import { sendImageMessage, getRoomHistory } from '../../api/chat';
+import { WebSocketManager } from '../../api/wss';
+import { AppStore } from '../../store/reducers';
+import { deleteActiveRoomId, updateActiveRoomId, upDateRoomUnread } from '../../store/actions/chat';
+import { UnionChatRouteGoTo } from '../../store/actions/route';
+import { ChatMode, ChatRole, UserInfoStore } from '../../store/types';
 import {
   MessageProps,
   TimeMessageType,
@@ -27,6 +23,8 @@ import {
   RoomStatus,
   SEND_MESSAGE_TIMEOUT,
   getMessageTime,
+  getJoinedTime,
+  GetLocalTime,
   RoomPageSize,
   base64ToBlob,
   TSendTextMessage,
@@ -34,16 +32,18 @@ import {
   TReSendMessage,
   TChangRoomStatus,
   TCloseRoom,
-  TOnPageChange
-} from "./common";
-import { Notification } from "../Notification";
+  TOnPageChange,
+  message_display_type,
+  mapMessageTypeToOfferBubbleStatus
+} from './common';
+import { Notification } from '../Notification';
 
 interface ContainerProps {
   id: string;
   type: RoomStatus;
   user: UserInfoStore;
   maxRoom: (id: string, categoryId: string, activeRole: ChatRole) => any;
-  updateActiveRoomId: (id: string, status: "common" | "min") => any;
+  updateActiveRoomId: (id: string, status: 'common' | 'min') => any;
   deleteActiveRoomId: (id: string) => any;
   refreshUnread: (id: string, activeRole: ChatRole) => any;
   onMaxRoomClose?: any;
@@ -69,16 +69,18 @@ interface ContainerState {
 
 const initialState = {
   count: 0,
-  next: "",
-  previous: "",
+  next: '',
+  previous: '',
   results: [],
-  server_time: "",
-  status: "",
+  server_time: '',
+  status: '',
   chatroom: {},
+
+  // handle change
   page: 1,
   pageSize: RoomPageSize,
   loading: false,
-  targetId: ""
+  targetId: ''
 };
 
 @(connect(
@@ -88,7 +90,7 @@ const initialState = {
   dispatch =>
     bindActionCreators(
       {
-        updateActiveRoomId: (id: string, status: "common" | "min") =>
+        updateActiveRoomId: (id: string, status: 'common' | 'min') =>
           updateActiveRoomId(id, status),
         deleteActiveRoomId: (id: string) => deleteActiveRoomId(id),
         maxRoom: (id: string, categoryId: string, activeRole: ChatRole) =>
@@ -97,8 +99,7 @@ const initialState = {
             categoryId,
             activeRole
           }),
-        refreshUnread: (id: string, activeRole: ChatRole) =>
-          upDateRoomUnread(activeRole, id)
+        refreshUnread: (id: string, activeRole: ChatRole) => upDateRoomUnread(activeRole, id)
       },
       dispatch
     )
@@ -108,6 +109,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   private ROOM: any = null;
 
   private activeRole: ChatRole;
+  private categoryId: string;
 
   constructor(props: ContainerProps) {
     super(props);
@@ -124,18 +126,21 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         page: this.state.page
       });
       if (status === 200 && data) {
-        const results = _get(data, ["results"]) || [];
+        let results = _get(data, ['results']) || [];
         const meId = this.props.user.userInfo.userId;
-        const sellerId = _get(data, ["chatroom", "seller_id"]);
-        const targetId =
-          meId === sellerId ? _get(data, ["chatroom", "buyer_id"]) : sellerId;
+        const sellerId = _get(data, ['chatroom', 'seller_id']);
+        const targetId = meId === sellerId ? _get(data, ['chatroom', 'buyer_id']) : sellerId;
+
+        results = results.filter(
+          (v: MessageProps) => v.msg_type && message_display_type.includes(v.msg_type as number)
+        );
 
         results.map((v: any) => {
           v.isFromHistory = true;
-          v.messageStatus = "success";
+          v.messageStatus = 'success';
         });
 
-        const nextResults = [{ msg_type: "carMessage" }].concat(
+        const nextResults = [{ msg_type: 'carMessage' }].concat(
           results.reverse().concat(this.state.results.slice(1))
         );
 
@@ -147,9 +152,9 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       }
     } catch (error) {
       Notification({
-        type: "error",
-        message: "upload image error",
-        description: _get(error, ["response", "data", "message"] || "")
+        type: 'error',
+        message: 'Get chatroom history error',
+        description: _get(error, ['response', 'data', 'detail'] || '')
       });
     } finally {
       this.setState({ loading: false });
@@ -158,11 +163,12 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
 
   onRoomMessage = (data: any) => {
     // console.log('on_message_from_server: ', data);
+    const msg_type = _get(data, ['msg_type']);
     if (
-      (_get(data, ["msg_type"]) === 1 && _get(data, ["extra", "content"])) ||
-      (_get(data, ["msg_type"]) === 2 && _get(data, ["extra", "url"]))
+      (msg_type === 1 && _get(data, ['extra', 'content'])) ||
+      (msg_type === 2 && _get(data, ['extra', 'url']))
     ) {
-      const receive_message_id = _get(data, ["message_id"]);
+      const receive_message_id = _get(data, ['message_id']);
       if (!receive_message_id) {
         return this.setState(prev => ({ results: prev.results.concat(data) }));
       }
@@ -170,22 +176,37 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         const nextResults = prev.results.slice();
         for (let i = nextResults.length - 1; i > 0; i--) {
           if (
-            Reflect.has(nextResults[i], "message_id") &&
-            nextResults[i]["message_id"] === receive_message_id
+            Reflect.has(nextResults[i], 'message_id') &&
+            nextResults[i]['message_id'] === receive_message_id
           ) {
-            this.state.results[i].messageStatus === "pending" &&
-              Reflect.set(nextResults[i], "messageStatus", "success");
+            this.state.results[i].messageStatus === 'pending' &&
+              Reflect.set(nextResults[i], 'messageStatus', 'success');
             break;
           }
         }
         return { results: nextResults };
       });
     }
-    if (_get(data, ["msg_type"]) === 6) {
+
+    if (msg_type === 6) {
       this.setState(prev => ({ results: prev.results.concat(data) }));
     }
-    if (_get(data, ["msg_type"]) === 8) {
+    if (msg_type === 8 && this.props.user.userInfo.userId === _get(data, ['receiver_id'])) {
       this.setState(prev => ({ results: prev.results.concat(data) }));
+    }
+    if (msg_type === 7 || msg_type === 9) {
+      this.setState(prev => {
+        const next = prev.results.slice();
+        for (let i = next.length - 1; i > 0; i--) {
+          if (next[i]['msg_type'] === 6 && next[i]['id'] === _get(data, ['id'])) {
+            next[i]['extra'].offer_status = mapMessageTypeToOfferBubbleStatus.get(
+              msg_type.toString()
+            );
+            break;
+          }
+        }
+        return { results: next };
+      });
     }
   };
 
@@ -197,8 +218,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     this.ROOM = room;
   };
 
-  refreshUnread = () =>
-    this.props.refreshUnread(this.props.id, this.activeRole);
+  refreshUnread = () => this.props.refreshUnread(this.props.id, this.activeRole);
 
   initialRoom = async () => {
     if (this.props.id) {
@@ -213,33 +233,12 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   }
 
   componentWillUnMount() {
-    this.ROOM.hasOwnProperty("close") && this.ROOM.close();
+    this.ROOM.hasOwnProperty('close') && this.ROOM.close();
   }
 
-  componentDidUpdate(prevProps: ContainerProps, prevState: ContainerState) {
+  componentDidUpdate(prevProps: ContainerProps) {
     if (prevProps.id !== this.props.id && this.props.id) {
       this.setState({ ...initialState }, () => this.initialRoom());
-    }
-
-    if (
-      prevProps.id === this.props.id &&
-      prevState.results.length < this.state.results.length
-    ) {
-      const _res = this.state.results;
-      const latest = _res.slice(-1)[0];
-      if (Reflect.has(latest, "isFromHistory")) return;
-      const beforeLatest = _res.slice(-2, -1)[0];
-      const beforeLatestTimeStamp = _get(beforeLatest, ["created_at"]);
-      const isExceedTenMinutes = getMessageTime(beforeLatestTimeStamp);
-      isExceedTenMinutes &&
-        this.setState(prev => {
-          const nextResults = prev.results;
-          nextResults.splice(-1, 0, {
-            msg_type: TimeMessageType,
-            extra: { content: isExceedTenMinutes }
-          });
-          return { results: nextResults };
-        });
     }
   }
 
@@ -247,12 +246,9 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     setTimeout(() => {
       const next = this.state.results.slice();
       for (let i = next.length - 1; i > 0; i--) {
-        if (
-          Reflect.has(next[i], "message_id") &&
-          next[i]["message_id"] === message_id
-        ) {
-          this.state.results[i].messageStatus === "pending" &&
-            Reflect.set(next[i], "messageStatus", "error");
+        if (Reflect.has(next[i], 'message_id') && next[i]['message_id'] === message_id) {
+          this.state.results[i].messageStatus === 'pending' &&
+            Reflect.set(next[i], 'messageStatus', 'error');
           break;
         }
       }
@@ -270,7 +266,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       this.setState({ loading: true });
       if (base64Image) {
         const _message = this.getMessageTemplate({
-          type: "image",
+          type: 'image',
           url: base64Image,
           id: uuid
         });
@@ -282,9 +278,9 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       await sendImageMessage(this.props.id, data);
     } catch (e) {
       Notification({
-        type: "error",
-        message: "upload image error",
-        description: _get(e, ["response", "data", "message"] || e || "")
+        type: 'error',
+        message: 'upload image error',
+        description: _get(e, ['response', 'data', 'message'] || e || '')
       });
     } finally {
       this.setState({ loading: false });
@@ -300,7 +296,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     text?: string;
     url?: string;
     id: string;
-    type: "text" | "image";
+    type: 'text' | 'image';
   }): MessageProps => {
     const {
       userInfo: { userId, headshot, company_country }
@@ -311,10 +307,10 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     };
     return {
       msg_type: types[type],
-      messageStatus: "pending",
+      messageStatus: 'pending',
       extra: {
-        content: type === "text" ? text : "",
-        url: type === "image" ? url : ""
+        content: type === 'text' ? text : '',
+        url: type === 'image' ? url : ''
       },
       sender: {
         id: userId,
@@ -322,7 +318,8 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         company_country: company_country
       },
       message_id: id,
-      isFromHistory: false
+      isFromHistory: false,
+      created_at: `${Date.now()}`
     };
   };
 
@@ -336,7 +333,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
         this.setState(
           prev => ({
             results: prev.results.concat(
-              this.getMessageTemplate({ text, id: message_id, type: "text" })
+              this.getMessageTemplate({ text, id: message_id, type: 'text' })
             )
           }),
           () => this.checkMessage(message_id)
@@ -344,9 +341,9 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       }
     } catch (e) {
       Notification({
-        type: "error",
-        message: "Send text error",
-        description: _get(e, ["response", "data", "message"] || e || "")
+        type: 'error',
+        message: 'Send text error',
+        description: _get(e, ['response', 'data', 'message'] || e || '')
       });
     } finally {
       this.setState({ loading: false });
@@ -354,10 +351,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   };
 
   changRoomStatus: TChangRoomStatus = async () => {
-    this.props.updateActiveRoomId(
-      this.props.id,
-      this.props.type === "common" ? "min" : "common"
-    );
+    this.props.updateActiveRoomId(this.props.id, this.props.type === 'common' ? 'min' : 'common');
   };
 
   closeRoom: TCloseRoom = async () => {
@@ -367,6 +361,8 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   onMaxRoomClose: TOnPageChange = () => {
     this.props.onMaxRoomClose && this.props.onMaxRoomClose(this.props.id);
   };
+
+  // maxRoom = () => this.props.maxRoom(this.props.id, this.categoryId, this.activeRole);
 
   onPageChange = () => {
     if (this.state.next) {
@@ -387,8 +383,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       prev => {
         const next = prev.results.slice();
         const index = next.findIndex(
-          v =>
-            Reflect.has(v, "message_id") && v.message_id === message.message_id
+          v => Reflect.has(v, 'message_id') && v.message_id === message.message_id
         );
         targetMessage = next.splice(index, 1)[0];
         return {
@@ -397,19 +392,43 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
       },
       async () => {
         if (targetMessage.msg_type === 1) {
-          this.sendTextMessage(_get(targetMessage, ["extra", "content"]));
+          this.sendTextMessage(_get(targetMessage, ['extra', 'content']));
         }
         if (targetMessage.msg_type === 2) {
-          const base64Image = _get(targetMessage, ["extra", "url"]);
+          const base64Image = _get(targetMessage, ['extra', 'url']);
           const blobImage = await base64ToBlob(base64Image);
           const uuid = uniqueID();
           const data = new FormData();
-          data.append("image", blobImage);
-          data.append("message_id", uuid);
+          data.append('image', blobImage);
+          data.append('message_id', uuid);
           this.sendImageMessage(data, base64Image, uuid);
         }
       }
     );
+  };
+
+  getTimeMessage = (timestamp: string): object => ({
+    msg_type: TimeMessageType,
+    extra: { content: timestamp }
+  });
+
+  getLoacalTime = (timezone: string): string => {
+    const date = new Date(0);
+    date.toLocaleString('', { hour12: false, timeZone: timezone });
+    new Intl.DateTimeFormat('', { timeZone: timezone });
+    return '';
+  };
+
+  addTimeMessage = (results: MessageProps[]): MessageProps[] => {
+    return results.reduce((prev, curr: any, index: number) => {
+      const left = index === 1 && !this.state.next ? 0 : _get(prev.slice(-1)[0], ['created_at']);
+      const right = _get(curr, ['created_at']);
+      const time_message = getMessageTime(left, right);
+      if (time_message) {
+        curr = [this.getTimeMessage(time_message)].concat(curr);
+      }
+      return prev.concat(curr);
+    }, []);
   };
 
   render() {
@@ -421,49 +440,45 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
     );
 
     const target =
-      _get(matchTarget, ["sender_id"]) === targetId
-        ? _get(matchTarget, ["sender"])
-        : _get(matchTarget, ["receiver"]);
+      _get(matchTarget, ['sender_id']) === targetId
+        ? _get(matchTarget, ['sender'])
+        : _get(matchTarget, ['receiver']);
 
     const targetName =
-      _get(target, ["display_name"]) ||
-      _get(chatroom, ["opposite", "display_name"]);
-    const targetHeadshot =
-      _get(target, ["headshot"]) || _get(chatroom, ["opposite", "headshot"]);
-    const targetJoined =
-      _get(target, ["created_at"]) ||
-      _get(chatroom, ["opposite", "created_at"]);
+      _get(target, ['display_name']) || _get(chatroom, ['opposite', 'display_name']);
+    const targetHeadshot = _get(target, ['headshot']) || _get(chatroom, ['opposite', 'headshot']);
+    const targetJoined = compose(getJoinedTime)(
+      _get(target, ['created_at']) || _get(chatroom, ['opposite', 'created_at'])
+    );
     const targetTotalTrad =
-      _get(target, ["trade_history", "cars_sold"]) +
-        _get(target, ["trade_history", "cars_bought"]) ||
+      _get(target, ['trade_history', 'cars_sold']) +
+        _get(target, ['trade_history', 'cars_bought']) ||
       0 ||
-      (_get(chatroom, ["opposite", "trade_history", "cars_sold"]) +
-        _get(chatroom, ["opposite", "trade_history", "cars_bought"]) ||
+      (_get(chatroom, ['opposite', 'trade_history', 'cars_sold']) +
+        _get(chatroom, ['opposite', 'trade_history', 'cars_bought']) ||
         0);
-    const targetActive =
-      _get(target, ["last_time_online"]) ||
-      _get(chatroom, ["opposite", "last_time_online"]);
-    const targetLocalTime =
-      _get(target, ["local_time"]) ||
-      _get(chatroom, ["opposite", "local_time"]);
+    const targetActive = (
+      _get(target, ['last_time_online']) ||
+      _get(chatroom, ['opposite', 'last_time_online']) ||
+      ''
+    ).replace('Active ', '');
+    const targetLocalTime = _get(chatroom, ['opposite', 'local_timezone']);
     const targetLocale =
-      _get(target, ["company_country"]) ||
-      _get(chatroom, ["opposite", "company_country"]);
+      _get(target, ['company_country']) || _get(chatroom, ['opposite', 'company_country']);
 
     // car
-    const carImage = _get(chatroom, ["car_info", "thumbnail"]) || "";
-    const carMakeLogo = _get(chatroom, ["car_info", "make_logo"]) || "";
-    const carName = _get(chatroom, ["car_info", "name"]) || "";
-    const carMileage = _get(chatroom, ["car_info", "distance_to_warehouse"]);
-    const carMileageUnit =
-      _get(chatroom, ["car_info", "distance_unit", "display_value"]) || "";
-    const carStatus = _get(chatroom, ["car_info", "car_status"]) || -1;
-    const carUnit = _get(chatroom, ["car_info", "quantity"]) || "";
-    const orderType = _get(chatroom, ["order_type"]) || -1;
+    const carImage = _get(chatroom, ['car_info', 'thumbnail']) || '';
+    const carMakeLogo = _get(chatroom, ['car_info', 'make_logo']) || '';
+    const carName = _get(chatroom, ['car_info', 'name']) || '';
+    const carMileage = _get(chatroom, ['car_info', 'distance_to_warehouse']);
+    const carMileageUnit = _get(chatroom, ['car_info', 'distance_unit', 'display_value']) || '';
+    const carStatus = _get(chatroom, ['car_info', 'car_status']) || -1;
+    const carUnit = _get(chatroom, ['car_info', 'quantity']) || '';
+    const orderType = _get(chatroom, ['order_type']) || -1;
 
     return (
       <React.Fragment>
-        {type === "common" && (
+        {type === 'common' && (
           <CommonRoom
             id={id}
             chatroom={chatroom}
@@ -471,25 +486,26 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
             targetLocale={targetLocale}
             targetName={targetName}
             targetActive={targetActive}
-            targetLocalTime={targetLocalTime}
+            targetLocalTime={<GetLocalTime timezone={targetLocalTime} />}
             carName={carName}
             carMileage={carMileage}
             carMileageUnit={carMileageUnit}
             carStatus={carStatus}
             orderType={orderType}
-            results={results}
+            results={this.addTimeMessage(results)}
             loading={loading}
             user={user}
             imageMessage={this.sendImageMessage}
             textMessage={this.sendTextMessage}
             changRoomStatus={this.changRoomStatus}
             closeRoom={this.closeRoom}
+            // maxRoom={this.maxRoom}
             onPageChange={this.onPageChange}
             resendMessage={this.resendMessage}
           />
         )}
 
-        {type === "min" && (
+        {type === 'min' && (
           <MinRoom
             id={id}
             targetName={targetName}
@@ -506,7 +522,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
           />
         )}
 
-        {type === "max" && (
+        {type === 'max' && (
           <MaxRoom
             id={id}
             chatroom={chatroom}
@@ -514,7 +530,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
             targetJoined={targetJoined}
             targetTotalTrad={targetTotalTrad}
             targetActive={targetActive}
-            targetLocalTime={targetLocalTime}
+            targetLocalTime={<GetLocalTime timezone={targetLocalTime} />}
             carImage={carImage}
             carMakeLogo={carMakeLogo}
             carName={carName}
@@ -522,7 +538,7 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
             carUnit={carUnit}
             carMileage={carMileage}
             carMileageUnit={carMileageUnit}
-            results={results}
+            results={this.addTimeMessage(results)}
             orderType={orderType}
             loading={loading}
             user={user}

@@ -39,14 +39,6 @@ $down-price-max-length: 389px - 16px -16px - 67px - 8px;
   display: unset;
 }
 
-// @mixin multLine($line) {
-//   overflow: hidden;
-//   text-overflow: ellipsis;
-//   display: -webkit-box;
-//   -webkit-line-clamp: $line;
-//   -webkit-box-orient: vertical;
-// }
-
 .flexBox {
   display: flex;
   justify-content: center;
@@ -502,9 +494,8 @@ $down-price-max-length: 389px - 16px -16px - 67px - 8px;
       justify-content: flex-start;
       border-top: 1px solid #ebebeb;
       width: 389px;
-      height: 48px;
       overflow: hidden;
-      height: 48px;
+      height: 49px;
       position: absolute;
       left: 0;
 
@@ -538,9 +529,8 @@ $down-price-max-length: 389px - 16px -16px - 67px - 8px;
       justify-content: flex-start;
       border-top: 1px solid #ebebeb;
       width: 389px;
-      height: 48px;
       overflow: hidden;
-      height: 48px;
+      height: 49px;
       position: absolute;
       left: 0;
 

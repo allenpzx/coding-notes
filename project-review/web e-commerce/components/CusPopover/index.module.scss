@@ -1,0 +1,79 @@
+@import '../../assets/style/config.scss';
+
+.popcontent {
+  @include flexCenter();
+  @include fontSFPro();
+  flex-wrap: nowrap;
+  //外层 12 16
+  padding: 0 10px;
+  font-size: 14px;
+  color: #001a33;
+}
+
+.wrappedChild {
+  @include flexCenter();
+  flex-wrap: nowrap;
+}
+
+.CustomPopover {
+  z-index: 1000;
+  position: relative;
+  .hoverContent {
+    @include flexCenter();
+    @include fontSFPro();
+    position: absolute;
+    left: 32px;
+    top: calc(28px + 24px + 14px);
+    padding: 11px 0;
+    color: $blue;
+    cursor: pointer;
+    z-index: 40;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 86px;
+    height: 38px;
+    box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+    background-color: #ffffff;
+    opacity: 0;
+    transform: scale(0, 0);
+    transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+    transform-origin: 50% 0%;
+    // box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.07);
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 10px;
+      width: 0px;
+      height: 0px;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 7px solid white;
+    }
+  }
+
+  .comingSoon {
+    width: auto;
+    height: auto;
+    font-size: 14px;
+    color: #001a33;
+    padding: 11px 20px;
+    white-space: nowrap;
+    left: calc(50% - 54px);
+    top: calc(50% + 26px);
+
+    &:after {
+      left: calc(50% - 7px);
+    }
+  }
+
+  .wrapChild {
+    height: 100%;
+  }
+
+  &:hover .hoverContent {
+    opacity: 1;
+    transform: scale(1, 1);
+  }
+}

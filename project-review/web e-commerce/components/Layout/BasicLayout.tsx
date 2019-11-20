@@ -21,9 +21,9 @@ export default class BasicLayout extends React.Component<Props, {}> {
     return (
       <div className={styles.container}>
         <Header />
-        <main className={styles.mainStyle} style={style}>
+        <div className={styles.mainStyle} style={style} id="basic_layout_main">
           {children}
-        </main>
+        </div>
         <Footer />
       </div>
     );

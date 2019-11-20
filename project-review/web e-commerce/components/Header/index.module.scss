@@ -43,6 +43,14 @@ $mainLeft: calc((100% - 1200px) * 0.5);
   flex: 0 0 auto;
   box-sizing: border-box;
 
+  // forbid text select
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
   // 一级导航区域
   .main {
     background-color: $bgColor;
@@ -136,7 +144,7 @@ $mainLeft: calc((100% - 1200px) * 0.5);
     }
   }
 
-  .menuItemActive:after {
+  .menuItemActiveTriangle:after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -253,25 +261,55 @@ $mainLeft: calc((100% - 1200px) * 0.5);
       align-items: center;
       position: relative;
       @extend .cursor;
-      // border: 1px solid red;
+    }
+
+    &:last-child {
+      justify-content: flex-end;
     }
   }
 
   .subMenu_buy {
     opacity: 1;
     transform: scale(1, 1);
-    padding-left: calc(((100% - 1200px) * 0.5) + 200px);
+    padding-left: calc(((100% - 1200px) * 0.5) + 220px);
+    z-index: 100;
   }
   .subMenu_sell {
     opacity: 1;
     transform: scale(1, 1);
-    padding-left: calc(((100% - 1200px) * 0.5) + 280px);
+    padding-left: calc(((100% - 1200px) * 0.5) + 300px);
+    z-index: 100;
   }
   .subMenu_order {
     opacity: 1;
     transform: scale(1, 1);
+    padding-right: 145px;
     justify-content: flex-end;
-    padding-right: 156px;
+    z-index: 100;
+  }
+
+  .subMenu_expanded {
+    &_buy {
+      opacity: 1;
+      transform: scale(1, 1);
+      padding-left: calc(((100% - 1200px) * 0.5) + 220px);
+      z-index: 50;
+    }
+
+    &_sell {
+      opacity: 1;
+      transform: scale(1, 1);
+      padding-left: calc(((100% - 1200px) * 0.5) + 300px);
+      z-index: 50;
+    }
+
+    &_order {
+      opacity: 1;
+      transform: scale(1, 1);
+      justify-content: flex-end;
+      padding-right: 145px;
+      z-index: 50;
+    }
   }
 }
 
@@ -296,13 +334,10 @@ $mainLeft: calc((100% - 1200px) * 0.5);
   paddingRight: $mainLeft;
 }
 
-.orderPagePadding {
+.expanded {
   margin-bottom: 45px;
+}
 
-  .subMenu_order {
-    opacity: 1;
-    transform: scale(1, 1);
-    justify-content: flex-end;
-    padding-right: 156px;
-  }
+.pr8px {
+  padding-right: 4px;
 }

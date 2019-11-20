@@ -19,11 +19,13 @@ import Empty from '../../components/Empty/Empty';
 import { getCookie } from '../../common/cookie';
 import { path } from '../../routes/routers';
 import styles from '../../components/Card/index.module.scss';
+import { bindActionCreators } from 'redux';
 
 interface OutProps extends Props {}
 interface Props {
   setting: SettingInfoStore;
   company_country: string;
+  setUser: any;
 }
 
 interface State {
@@ -38,10 +40,38 @@ interface State {
 }
 
 @(withRouter as any)
-@(connect((state: AppStore) => ({
-  setting: state.setting,
-  company_country: state.user.userInfo.company_country
-})) as any)
+@(connect(
+  (state: AppStore) => ({
+    setting: state.setting,
+    company_country: state.user.userInfo.company_country
+  }),
+  dispatch =>
+    bindActionCreators(
+      {
+        setUser: ({
+          id = '',
+          first_name = '',
+          last_name = '',
+          phone = '',
+          username = '',
+          company_country = '',
+          headshot = '',
+          display_name = ''
+        }) =>
+          SetUserInfo({
+            userId: id,
+            first_name,
+            last_name,
+            phone,
+            username,
+            company_country,
+            headshot,
+            display_name
+          })
+      },
+      dispatch
+    )
+) as any)
 class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> {
   static defaultProps: OutProps;
 
@@ -94,8 +124,8 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
       headshot = '',
       display_name = ''
     } = res.data;
-    SetUserInfo({
-      userId: id,
+    this.props.setUser({
+      id,
       first_name,
       last_name,
       phone,
@@ -106,13 +136,12 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
     });
   };
 
-  async loadData(opt?: object) {
+  loadData = async (opt?: object) => {
     try {
       if (!getCookie('Authorization')) {
         this.goto('/login');
       }
 
-      const { setting, company_country } = this.props;
       const { page, pageSize, loading } = this.state;
       if (loading) return;
       this.setState({ loading: true });
@@ -131,7 +160,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
       const res = await searchMarketList({
         page,
         size: pageSize,
-        is_new_car: 0,
+        // is_new_car: 0,
         ...opt
       });
       // 跳页前禁止setState
@@ -144,7 +173,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
         _self.goto('/login');
       }
     }
-  }
+  };
 
   onCardClick = (id: string) => (e: React.MouseEvent<HTMLDivElement>) =>
     window.open(`${path.BuyCarDetail}/${id}`);
@@ -159,7 +188,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
   }
 
   render() {
-    const { loading, results, page, pageSize, count } = this.state;
+    const { loading, results, page, pageSize, count, next } = this.state;
     const {
       setting: { ALL_CURRENCIES },
       company_country
@@ -169,11 +198,10 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
       return matched ? matched.symbol : '$';
     }
 
-    // console.log('上线之前测试用 log count: ', count);
     return (
       <BasicLayout>
         <div className={styles.wrappedContainer}>
-          <FilterBar total={count} loading={loading} />
+          <FilterBar total={count} loading={loading} onChange={this.loadData} />
           {loading && <Loading />}
           {!loading && results.length === 0 && <Empty emptyType="empty_market" />}
           {!loading && results.length > 0 && (
@@ -211,7 +239,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
               ))}
             </div>
           )}
-          {results.length > 0 && (
+          {results.length > 0 && next && (
             <Pagination
               currentPage={page}
               total={count}

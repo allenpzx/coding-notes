@@ -12,6 +12,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { CardType } from './CardTypes';
 import _get from '../../common/get';
 import utils from '../../common/util';
+import { CusPopover } from '../CusPopover';
 import styles from './index.module.scss';
 
 const thousands = utils.numberWithCommas;
@@ -105,18 +106,33 @@ class Card extends PureComponent<CardType & SFC, State> {
       };
 
       // CN 用户nego
-      if (user_company_country === 'CN' && !is_new_car && distance_to_warehouse <= 350) {
+      // if (user_company_country === 'CN' && !is_new_car && distance_to_warehouse <= 350) {
+      //   return (
+      //     <div className={styles.price_row}>
+      //       <div className={styles.left}>
+      //         <FormattedMessage id="buy_market_card_negotiable" defaultMessage="NEGOTIABLE" />
+      //       </div>
+      //     </div>
+      //   );
+      // }
+
+      if (user_company_country === 'CN' && isSafeMoney(price)) {
         return (
           <div className={styles.price_row}>
-            <div className={styles.left}>
-              <FormattedMessage id="buy_market_card_negotiable" defaultMessage="NEGOTIABLE" />
+            <div className={styles.left} {...fontStyle}>
+              <span className={styles.priceDisplay}>
+                <span className={styles.prefix}>{money_symbol}</span>
+                <span>{`${formatPrice(price)}`}</span>
+              </span>
+              <span className={styles.priceCurrency}>{currency}</span>
             </div>
+            <div className={styles.buy_tag}>BUY NOW</div>
           </div>
         );
       }
 
       // CN 用户 msrp
-      if (user_company_country === 'CN') {
+      if (user_company_country === 'CN' && !isSafeMoney(price)) {
         return (
           <div className={styles.price_row}>
             <div className={styles.left} {...fontStyle}>
@@ -127,6 +143,16 @@ class Card extends PureComponent<CardType & SFC, State> {
               <span className={styles.priceCurrency}>{currency}</span>
             </div>
             <div className={styles.msrp_tag}>MSRP</div>
+          </div>
+        );
+      }
+
+      if (user_company_country === 'CN') {
+        return (
+          <div className={styles.price_row}>
+            <div className={styles.left}>
+              <FormattedMessage id="buy_market_card_negotiable" defaultMessage="NEGOTIABLE" />
+            </div>
           </div>
         );
       }
@@ -261,12 +287,14 @@ class Card extends PureComponent<CardType & SFC, State> {
 
         {type === 'sell_market' && (
           <div className={styles.sell_row}>
-            <span
-              className={styles.sell_row_item}
-              onClick={onCardBottomClick({ id, type: 'edit_sell_market' })}
-            >
-              Edit
-            </span>
+            <CusPopover>
+              <span
+                className={styles.sell_row_item}
+                onClick={onCardBottomClick({ id, type: 'edit_sell_market' })}
+              >
+                Edit
+              </span>
+            </CusPopover>
             <span
               className={styles.sell_row_item}
               onClick={onCardBottomClick({ id, type: 'move_to_garage' })}
@@ -290,12 +318,14 @@ class Card extends PureComponent<CardType & SFC, State> {
             >
               Publish
             </span>
-            <span
-              className={styles.sell_garage_row_item}
-              onClick={onCardBottomClick({ id, type: 'edit_sell_garage' })}
-            >
-              Edit
-            </span>
+            <CusPopover>
+              <span
+                className={styles.sell_garage_row_item}
+                onClick={onCardBottomClick({ id, type: 'edit_sell_garage' })}
+              >
+                Edit
+              </span>
+            </CusPopover>
             <span
               className={styles.sell_garage_row_item}
               onClick={onCardBottomClick({ id, type: 'remove_sell_garage' })}

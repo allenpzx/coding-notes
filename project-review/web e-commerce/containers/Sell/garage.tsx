@@ -9,7 +9,6 @@ import { CardType, cardEventType } from '../../components/Card/CardTypes';
 import Pagination from '../../components/Pagination';
 import _get from '../../common/get';
 import Loading from '../../components/Card/loading';
-import FilterBar from '../../components/FilterBar';
 import { connect } from 'react-redux';
 import { AppStore } from '../../store/reducers/index';
 import { SettingInfoStore } from '../../store/types';
@@ -194,17 +193,14 @@ class SellMarket extends React.Component<Props & RouteComponentProps<{}>, State>
   };
 
   modalHide = () =>
-    this.setState(
-      {
-        modal_visible: false,
-        modal_title: '',
-        modal_message: '',
-        modal_ok_fn: () => {},
-        modal_ok_text: '',
-        modal_cancel_text: ''
-      },
-      () => console.log('hide modal')
-    );
+    this.setState({
+      modal_visible: false,
+      modal_title: '',
+      modal_message: '',
+      modal_ok_fn: () => {},
+      modal_ok_text: '',
+      modal_cancel_text: ''
+    });
 
   onCardClick = (id: string) => (e: React.MouseEvent<HTMLDivElement>) =>
     window.open(`${path.BuyCarDetail}/${id}`);
@@ -261,7 +257,8 @@ class SellMarket extends React.Component<Props & RouteComponentProps<{}>, State>
       modal_message,
       modal_ok_fn,
       modal_cancel_text,
-      modal_ok_text
+      modal_ok_text,
+      next
     } = this.state;
     const {
       setting: { ALL_CURRENCIES },
@@ -274,7 +271,6 @@ class SellMarket extends React.Component<Props & RouteComponentProps<{}>, State>
     return (
       <BasicLayout>
         <div className={styles.wrappedContainer}>
-          <FilterBar total={count} loading={loading} />
           {loading && <Loading />}
           {!loading && results.length === 0 && <Empty emptyType="empty_garage" />}
           {!loading && results.length > 0 && (
@@ -312,7 +308,7 @@ class SellMarket extends React.Component<Props & RouteComponentProps<{}>, State>
               ))}
             </div>
           )}
-          {results.length > 0 && (
+          {results.length > 0 && next && (
             <Pagination
               currentPage={page}
               total={count}

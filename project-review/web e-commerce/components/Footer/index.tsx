@@ -10,7 +10,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import IconFont from '../ui/TradexIcon';
 import styles from './index.module.scss';
 
-const QRIcon = <IconFont type="iconerweima-xianicon_qrcode_line" className={styles.qrIcon} />;
+const QRIcon = <IconFont type="iconicon_qrcode_line" className={styles.qrIcon} />;
 
 interface InProps extends RouteComponentProps {}
 

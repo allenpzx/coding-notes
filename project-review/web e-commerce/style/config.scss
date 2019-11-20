@@ -1,0 +1,153 @@
+// 请勿改动全局多处引用的样式
+
+$white: #ffffff;
+$black: #001a33;
+$borderGray: #ebebeb;
+$backgroundGray: #fafafa;
+$backgroundDisable: #cccccc;
+$fontGray: #8a9199;
+$btnGray: #f7f7f7;
+$blue: #3acdfe;
+$green: #21c442;
+$iconBlue: #3bcdfe;
+$yellow: #ff9910;
+$iconRed: #f2565f;
+
+$chatBasicZIndex: 1000;
+
+@mixin zIndexChat {
+  z-index: $chatBasicZIndex;
+}
+
+@mixin zIndexNotification {
+  z-index: 2000;
+}
+
+@mixin zIndexDrawer {
+  z-index: 3000;
+}
+
+@mixin zIndexPop {
+  z-index: 4000;
+}
+
+@mixin zIndexModel {
+  z-index: 9000;
+}
+
+@mixin zIndexChatAllInOne {
+  z-index: 9000;
+}
+
+@mixin zIndexHighest {
+  z-index: 9999;
+}
+
+@mixin flex {
+  display: flex;
+}
+// 水平居中
+@mixin flexJustifyCenter {
+  @include flex;
+  justify-content: center;
+}
+// 垂直居中
+@mixin flexAlignCenter {
+  @include flex;
+  align-items: center;
+}
+// 水平垂直居中
+@mixin flexCenter {
+  @include flexJustifyCenter;
+  @include flexAlignCenter;
+}
+//超过20px使用fontSFBig 否则使用fontSFPro
+@mixin fontSFPro {
+  font-family: SFProText;
+}
+@mixin fontSFBig {
+  font-family: SFBigText;
+}
+@mixin fontSFBold {
+  font-family: SFBoldText;
+}
+@mixin fontDIN {
+  font-family: DIN;
+}
+@font-face {
+  font-family: SFProText;
+  src: url('../fonts/sf-pro-text_regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: SFBigText;
+  src: url('../fonts/sf-pro-display_regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: SFBoldText;
+  src: url('../fonts/sf-pro-text_semibold.woff2') format('woff2');
+}
+@font-face {
+  font-family: DIN;
+  src: url('../fonts/dinweb-medium-woff-data.woff') format('woff');
+}
+@mixin cursor($type: pointer) {
+  cursor: $type;
+}
+@mixin border($corlor: $borderGray, $width: 1px, $style: solid) {
+  border-width: $width;
+  border-color: $corlor;
+  border-style: $style;
+}
+
+@mixin autoEtc($mw) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: $mw;
+}
+
+@mixin multLine($line) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: $line;
+  -webkit-box-orient: vertical;
+}
+
+@mixin fontFamily($fontFamily: fontSFPro) {
+  @if $fontFamily == fontSFPro {
+    @include fontSFPro;
+  } @else if $fontFamily == fontSFBig {
+    @include fontSFBig;
+  } @else if $fontFamily == fontSFBold {
+    @include fontSFBold;
+  } @else if $fontFamily == fontDIN {
+    @include fontDIN;
+  }
+}
+
+@mixin configFont($fontFamily: fontSFPro, $fontSize: 14px, $fontWeight: normal, $color: $black) {
+  @include fontFamily($fontFamily);
+  color: $color;
+  font-size: $fontSize;
+  font-weight: $fontWeight;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+@mixin forbidTextSelected {
+  // forbid text select
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin forbidBtnSelected {
+  opacity: 0.5;
+  pointer-events: none;
+}

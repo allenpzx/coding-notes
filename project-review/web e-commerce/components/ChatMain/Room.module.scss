@@ -2,7 +2,7 @@
 $maxRoomWidth: 790px;
 $maxRoomHeight: 800px;
 
-$commonRoomWidth: 451px;
+$commonRoomWidth: 512px;
 $commonRoomHeight: 600px;
 
 $minRoomWidth: 320px;
@@ -165,12 +165,12 @@ $minRoomHeight: 132px;
   justify-content: center;
   align-items: center;
   border-radius: 2px;
-  background-color: #edf5ff;
-  @include fontSFPro();
+  background-color: #edf6ff;
+  @include fontSFBold();
   font-size: 12px;
   font-weight: bold;
   text-align: center;
-  color: #4a9fff;
+  color: #4da6ff;
   margin-right: 8px;
 }
 
@@ -181,17 +181,17 @@ $minRoomHeight: 132px;
   justify-content: center;
   align-items: center;
   border-radius: 2px;
-  background-color: #e5fed4;
-  @include fontSFPro();
+  background-color: #e0fee6;
+  @include fontSFBold();
   font-size: 12px;
   font-weight: bold;
   text-align: center;
-  color: #6fbe2c;
+  color: #21c442;
   margin-right: 8px;
 }
 
 .instant {
-  @include fontSFPro();
+  @include fontSFBold();
   border-radius: 4px;
   padding: 2px 4px;
   background-color: #dddeff;

@@ -117,10 +117,13 @@ class Header extends React.Component<OutterProps, State> {
     } = this.props;
     const { menuShow, mainMenu, notification } = this.state;
     const matchPath = (route: string): boolean => pathname.startsWith(route);
+    const isBuyPage = matchPath(allPath.BuyMarket);
+    const isSellPage = matchPath(allPath.SellMarket) || matchPath(allPath.SellGarage);
     const isOrderPage = matchPath(allPath.Order);
+    const isExpanded = isBuyPage || isSellPage || isOrderPage;
 
     return (
-      <header className={`${styles.container} ${isOrderPage ? styles.orderPagePadding : ''}`}>
+      <header className={`${styles.container} ${isExpanded ? styles.expanded : ''}`}>
         <div className={styles.main}>
           <div className={styles.logoWrap}>
             <img src={require('../../assets/img/logo.png')} alt="logo" className={styles.logo} />
@@ -128,9 +131,9 @@ class Header extends React.Component<OutterProps, State> {
 
           <ul className={styles.menu}>
             <li
-              className={`${styles.menuItem} ${
-                matchPath('/trade/buy/market/list') ? styles.active : ''
-              } ${menuShow && mainMenu === 'buy' ? styles.menuItemActive : ''}`}
+              className={`${styles.menuItem} ${isBuyPage ? styles.active : ''} ${
+                menuShow && mainMenu === 'buy' ? styles.menuItemActiveTriangle : ''
+              }`}
               onMouseOver={this.onMainMouseOver('buy')}
               onMouseLeave={this.onMainMouseLeave}
             >
@@ -141,8 +144,8 @@ class Header extends React.Component<OutterProps, State> {
               <IconFont type="iconicon_dropdown_line" className={styles.itemNex} />
             </li>
             <li
-              className={`${styles.menuItem} ${matchPath('/trade/sell/') ? styles.active : ''} ${
-                menuShow && mainMenu === 'sell' ? styles.menuItemActive : ''
+              className={`${styles.menuItem} ${isSellPage ? styles.active : ''} ${
+                menuShow && mainMenu === 'sell' ? styles.menuItemActiveTriangle : ''
               }`}
               onMouseOver={this.onMainMouseOver('sell')}
               onMouseLeave={this.onMainMouseLeave}
@@ -156,27 +159,30 @@ class Header extends React.Component<OutterProps, State> {
           </ul>
 
           <div className={styles.userInfo}>
-            <CustomPopover type="comingsoon">
-              <div className={styles.userInfoItem}>
-                <Badge dot={notification} className={styles.hackDot}>
-                  <IconFont type="iconicon_warn_line" className={styles.prefix} />
-                </Badge>
-                <span className={styles.tag}>
-                  <FormattedMessage id="header_notification" defaultMessage="Notification" />
-                </span>
-              </div>
-            </CustomPopover>
+            {/* <CustomPopover type="comingsoon"> */}
+            <div className={styles.userInfoItem}>
+              <Badge dot={notification} className={styles.hackDot}>
+                <IconFont type="iconicon_warn_line" className={styles.prefix} />
+              </Badge>
+              <span className={styles.tag}>
+                <FormattedMessage id="header_notification" defaultMessage="Notification" />
+              </span>
+            </div>
+            {/* </CustomPopover> */}
 
             <div
-              className={`${styles.userInfoItem} ${styles.pl32}`}
+              className={`${styles.userInfoItem} ${
+                menuShow && mainMenu === 'order' ? styles.menuItemActiveTriangle : ''
+              } ${styles.pl32} ${isOrderPage ? styles.active : ''}`}
               onMouseOver={this.onMainMouseOver('order')}
               onMouseLeave={this.onMainMouseLeave}
               onClick={this.goto(`${allPath.Order}/purchased`)}
             >
               <IconFont type="iconicon_pa_line" className={styles.prefix} />
-              <span className={styles.tag}>
+              <span className={`${styles.tag} ${styles.pr8px}`}>
                 <FormattedMessage id="header_ordercetner" defaultMessage="Order Center" />
               </span>
+              <IconFont type="iconicon_dropdown_line" className={styles.itemNex} />
             </div>
 
             <CustomPopover type="logout" hoverContent={<span onClick={this.logout}>Log out</span>}>
@@ -191,30 +197,10 @@ class Header extends React.Component<OutterProps, State> {
         </div>
 
         <div className={styles.sub}>
-          <div className={`${styles.subMenu} ${isOrderPage ? styles.subMenu_order : ''}`}>
-            <span
-              className={`${styles.subMenuItem} ${
-                matchPath(`${allPath.Order}/purchased`) ? styles.active : ''
-              }`}
-              onClick={this.goto(`${allPath.Order}/purchased`)}
-            >
-              Purchased
-            </span>
-
-            <span
-              className={`${styles.subMenuItem} ${
-                matchPath(`${allPath.Order}/sold`) ? styles.active : ''
-              }`}
-              onClick={this.goto(`${allPath.Order}/sold`)}
-            >
-              Sold
-            </span>
-          </div>
-
           <div
             className={`${styles.subMenu} ${
               menuShow && mainMenu === 'buy' ? styles.subMenu_buy : ''
-            }`}
+            } ${isBuyPage ? styles.subMenu_expanded_buy : ''}`}
             onMouseOver={this.onMainMouseOver('buy')}
             onMouseLeave={this.onMainMouseLeave}
           >
@@ -240,7 +226,7 @@ class Header extends React.Component<OutterProps, State> {
           <div
             className={`${styles.subMenu} ${
               menuShow && mainMenu === 'sell' ? styles.subMenu_sell : ''
-            }`}
+            } ${isSellPage ? styles.subMenu_expanded_sell : ''}`}
             onMouseOver={this.onMainMouseOver('sell')}
             onMouseLeave={this.onMainMouseLeave}
           >
@@ -271,6 +257,32 @@ class Header extends React.Component<OutterProps, State> {
                 Create
               </span>
             </CustomPopover>
+          </div>
+
+          <div
+            className={`${styles.subMenu} ${
+              menuShow && mainMenu === 'order' ? styles.subMenu_order : ''
+            } ${isOrderPage ? styles.subMenu_expanded_order : ''}`}
+            onMouseOver={this.onMainMouseOver('order')}
+            onMouseLeave={this.onMainMouseLeave}
+          >
+            <span
+              className={`${styles.subMenuItem} ${
+                matchPath(`${allPath.Order}/purchased`) ? styles.active : ''
+              }`}
+              onClick={this.goto(`${allPath.Order}/purchased`)}
+            >
+              Purchased
+            </span>
+
+            <span
+              className={`${styles.subMenuItem} ${
+                matchPath(`${allPath.Order}/sold`) ? styles.active : ''
+              }`}
+              onClick={this.goto(`${allPath.Order}/sold`)}
+            >
+              Sold
+            </span>
           </div>
         </div>
       </header>

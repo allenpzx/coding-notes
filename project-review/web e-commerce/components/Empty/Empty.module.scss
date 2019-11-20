@@ -1,0 +1,25 @@
+.emptyContainer {
+  padding: 16px 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emptyIcon {
+  :global {
+    .ant-empty-image {
+      height: auto;
+      margin-bottom: 4px;
+      img {
+        height: 300px;
+        width: 400px;
+      }
+    }
+    .ant-empty-description {
+      font-size: 16px;
+      color: #001a33;
+    }
+  }
+}

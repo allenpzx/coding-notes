@@ -1,0 +1,45 @@
+@import '../../assets/style/config.scss';
+
+.container {
+  :global {
+    width: 100%;
+    position: relative;
+    @include forbidTextSelected();
+
+    .ant-radio-wrapper {
+      display: flex;
+      align-items: center;
+      @include fontSFPro();
+      font-size: 12px;
+      font-weight: 500;
+      margin: 8px 0;
+
+      .ant-radio {
+        .ant-radio-inner {
+          width: 14px;
+          height: 14px;
+          border-width: 2px;
+        }
+        .ant-radio-inner:after {
+          width: 6px;
+          height: 6px;
+          top: 2px;
+          left: 2px;
+        }
+      }
+
+      &-checked {
+        color: $blue;
+        .ant-radio {
+          .ant-radio-inner {
+            color: $blue !important;
+            border: 2px solid $blue !important;
+          }
+          .ant-radio-inner:after {
+            background-color: $blue !important;
+          }
+        }
+      }
+    }
+  }
+}

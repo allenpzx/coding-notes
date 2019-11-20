@@ -1,0 +1,547 @@
+@import '../../assets/style/config.scss';
+
+$filterMenuWidth: 200px;
+
+@mixin bottomLine {
+  &:after {
+    content: '';
+    position: absolute;
+    height: 1px;
+    background-color: #ebebeb;
+    width: calc(100% - 32px);
+    left: 16px;
+    bottom: 0;
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+}
+
+.menuItemFont {
+  @include fontSFPro();
+  font-size: 12px;
+  color: #8a9199;
+}
+
+.title {
+  height: 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #001a33;
+}
+
+.container {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.FilterBar {
+  position: relative;
+  width: 1200px;
+  height: 60px;
+  display: flex;
+  @include fontSFPro();
+  justify-content: space-between;
+  align-items: center;
+
+  .left,
+  .right {
+    @include forbidTextSelected();
+    height: 60px;
+    border-radius: 8px;
+    box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.06);
+    background-color: #ffffff;
+    flex-grow: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .left {
+    position: relative;
+    width: 200px;
+    padding: 10px 16px;
+    cursor: pointer;
+
+    .bigFilterIcon {
+      @include flexCenter();
+      width: 40px;
+      height: 40px;
+      background-color: $blue;
+      border-radius: 50%;
+      color: #fff;
+      margin-right: 12px;
+
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .filterTitle {
+      @extend .title;
+    }
+
+    .statusIcon {
+      width: 16px;
+      height: 16px;
+      position: absolute;
+      right: 12px;
+      color: $blue;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  .right {
+    width: 992px;
+    padding: 22px 20px 22px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+
+    .btnGroup {
+      @include flexCenter();
+      cursor: pointer;
+      position: relative;
+      height: 60px;
+      .rightIcon {
+        @include flexCenter();
+        width: 16px;
+        height: 24px;
+        margin-right: 8px;
+        color: $blue;
+      }
+
+      .rightSpan {
+        @extend .title;
+      }
+    }
+
+    .total {
+      color: #8a9199;
+    }
+
+    .itemCount {
+      @include fontSFPro();
+      font-size: 14px;
+      color: #999999;
+    }
+  }
+}
+
+.animateConfig {
+  transition: all 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+  will-change: transform;
+}
+
+.sortMenu {
+  background-color: #fff;
+  position: absolute;
+  left: 208px;
+  top: 64px;
+
+  z-index: 20;
+  border-radius: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  opacity: 0;
+  width: 211px;
+  @extend .animateConfig;
+  transform: scale(0, 0);
+  transform-origin: 0 0;
+  @include forbidTextSelected();
+  box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.06);
+
+  .item {
+    background-color: #fff;
+    @include fontSFPro();
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #5c6166;
+    position: relative;
+    @include bottomLine();
+
+    &:last-child:after {
+      display: none;
+    }
+
+    &:hover,
+    &:active {
+      @include fontSFPro();
+      font-weight: 500;
+      color: $blue;
+      cursor: pointer;
+    }
+  }
+
+  .sortMenuItemActive {
+    @include fontSFPro();
+    color: $blue;
+    cursor: pointer;
+  }
+}
+
+.show {
+  opacity: 1;
+  opacity: 1;
+  transform: scale(1, 1);
+}
+
+.filterMenu {
+  position: absolute;
+  left: 0;
+  top: 64px;
+  width: $filterMenuWidth;
+  @extend .animateConfig;
+  transform-origin: 100% 0;
+  transform: scale(0, 0);
+  opacity: 0;
+  background-color: #fff;
+  padding: 12px 0;
+  z-index: 20;
+  border-radius: 8px;
+  box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.06);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .title {
+    @include fontSFPro();
+    @include flex();
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #001a33;
+    margin-bottom: 12px;
+    padding: 0 16px;
+
+    &:first-child {
+      cursor: pointer;
+    }
+
+    .symbol {
+      width: 4px;
+      height: 14px;
+      background-color: $blue;
+      position: absolute;
+      left: 0;
+    }
+
+    .titleIcon {
+      width: 16px;
+      height: 16px;
+      color: $blue;
+      position: absolute;
+      right: 12px;
+    }
+  }
+
+  .subMenuArea {
+    position: relative;
+    padding-left: 16px;
+    padding-right: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    .menu {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    &:hover .menuList {
+      transform: scale(1, 1);
+      opacity: 1;
+    }
+
+    // makes list
+    .menuListMakes {
+      padding: 0;
+
+      .makeLi {
+        width: 222px;
+        overflow-y: scroll;
+        background-color: #fff;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        overflow: hidden;
+        height: auto;
+        border-bottom: none;
+        padding: 0;
+
+        .alpha {
+          @include fontSFPro();
+          font-size: 12px;
+          color: #001a33;
+          width: 100%;
+          height: 42px;
+          display: flex;
+          align-items: center;
+          padding: 16px;
+          @include bottomLine();
+        }
+
+        .makeItem {
+          height: 46px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          padding-left: 16px;
+          padding-right: 16px;
+          width: 100%;
+          position: relative;
+          @include bottomLine();
+
+          .makeItemName {
+            @extend .menuItemFont;
+          }
+
+          .makeItemLogo {
+            width: 34px;
+            height: 34px;
+          }
+
+          .makeItemCount {
+            position: absolute;
+            right: 38px;
+            @extend .menuItemFont;
+            text-align: right;
+          }
+        }
+      }
+    }
+
+    .menuListChosen {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      li {
+        padding: 0 8px;
+        border: 1px solid #ebebeb;
+        width: 100%;
+        height: 32px;
+        background-color: #f4f6f9;
+        @include fontSFPro();
+        @include flex();
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #001a33;
+
+        .tag {
+          @include autoEtc(128px);
+        }
+
+        &:not(:first-child) {
+          border-top: none;
+        }
+      }
+    }
+  }
+
+  .menuTitle {
+    @include fontSFPro();
+    font-size: 14px;
+    color: #001a33;
+  }
+
+  .arrowIcon {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .menuList,
+  .menuListMakes {
+    @extend .animateConfig;
+    transform-origin: 0% 0%;
+    transform: scale(0, 0);
+    position: absolute;
+    list-style: none;
+    opacity: 0;
+    left: 100%;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    width: 222px;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.06);
+    max-height: 451px;
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    li {
+      @include fontSFPro();
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: normal;
+      color: #8a9199;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      // @extend .bottomLine;
+      height: 46px;
+      box-sizing: border-box;
+      padding: 0 16px;
+      position: relative;
+      @include bottomLine();
+    }
+  }
+}
+
+.filterShow {
+  opacity: 1;
+  transform: scale(1, 1);
+}
+
+.rangeArea {
+  padding: 12px 0 0 0;
+
+  .title {
+    @extend .menuItemFont;
+    @include forbidTextSelected();
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .sliderArea {
+    height: 14px + 6px + 16px + 10px;
+    position: relative;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+.colorArea {
+  .menuList {
+    top: 12px;
+    width: 168px;
+
+    .colorCircle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      box-sizing: border-box;
+      border: solid 1px #ebebeb;
+      margin-right: 8px;
+      flex: 0 0 auto;
+    }
+  }
+
+  .colors {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
+    border: solid 1px #ebebeb;
+    background-color: #ffffff;
+
+    .colorsBox {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      height: 32px;
+      padding: 11px 12px;
+
+      // li {
+      //   list-style: none;
+      //   border-radius: 50%;
+      //   width: 10px;
+      //   height: 10px;
+      //   margin-right: 4px;
+      //   border: solid 1px #ebebeb;
+      // }
+    }
+  }
+}
+
+.miniCircle {
+  list-style: none;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border: solid 1px #ebebeb;
+  display: inline-block;
+}
+
+.radioArea {
+  width: 100%;
+  padding: 28px 16px 0 16px;
+  position: relative;
+}
+
+.conditions {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding-top: 8px;
+  background-color: transparent;
+  margin-bottom: -8px;
+
+  .item {
+    border-radius: 4px;
+    padding: 12px 8px;
+    background-color: #fff;
+    border: solid 1px #e6e6e6;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    @include forbidTextSelected();
+
+    .type {
+      @include fontSFPro();
+      font-size: 14px;
+      font-weight: 500;
+      color: #acb6bf;
+      margin-right: 8px;
+    }
+
+    .desc {
+      @include fontSFPro();
+      font-size: 14px;
+      font-weight: 500;
+      color: #001a33;
+      margin-right: 8px;
+    }
+
+    .close {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      color: #001a33;
+    }
+  }
+}
+
+.inlineBlock {
+  display: inline-block;
+}
