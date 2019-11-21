@@ -3,7 +3,7 @@
 
 比如订单列表，商品列表，运单列表，主要有筛选过滤，搜索，分页等功能
 
-1. 初始化loadData({…getConditions(), …getNextPage()})
+1. loadData思路({…getConditions(), …getNextPage()})
 2. onChange
 
 ```javascript
@@ -12,7 +12,7 @@ loadData({…getConditions(), …getNextPage()})
 ```
 
 3. ConditionsBar PaginationBar loading 状态禁止更改查询条件和分页
-4. 分页第一页不能 prev, 最后一页不能 next, 跳页最大值不能大于总页数
+4. 分页第一页不能 prev, 最后一页不能 next, 跳页最大值不能大于总页数, 没有next隐藏pagination
 
 5. loadData要设置loading状态, 空数据状态，error 空数据状态
 

@@ -1,4 +1,4 @@
-import React, { SFC } from 'react';
+import React, { SFC, memo } from 'react';
 import { Radio } from 'antd';
 import styles from './index.module.scss';
 
@@ -23,4 +23,4 @@ const RadioBtn: SFC<IRadioBtn> = ({ value, onChange, all }) => (
   </Radio.Group>
 );
 
-export default RadioBtn;
+export default memo(RadioBtn);

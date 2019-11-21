@@ -17,7 +17,7 @@ interface InProps extends RouteComponentProps {}
 interface OutProps extends InProps {}
 
 @(withRouter as any)
-class Footer extends React.Component<InProps, {}> {
+class Footer extends React.PureComponent<InProps, {}> {
   static defaultProps: OutProps;
 
   goto = (path: string) => () => {

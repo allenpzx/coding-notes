@@ -5,7 +5,7 @@
  * @author zixiu
  */
 
-import React, { SFC } from 'react';
+import React, { SFC, memo } from 'react';
 import { Slider } from 'antd';
 import formatNumber from '../../common/thousands';
 import styles from './index.module.scss';
@@ -26,8 +26,9 @@ const SliderInput: SFC<ISliderInput> = ({ min, max, left, right, onChange, onAft
       <span>{formatNumber(right)}</span>
     </div>
     <Slider
-      className={styles.hackSlider}
       range
+      className={styles.hackSlider}
+      value={[left, right]}
       min={min}
       max={max}
       defaultValue={[min, max]}
@@ -43,4 +44,4 @@ const SliderInput: SFC<ISliderInput> = ({ min, max, left, right, onChange, onAft
   </div>
 );
 
-export default SliderInput;
+export default memo(SliderInput);

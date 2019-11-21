@@ -21,37 +21,8 @@ import styles from './index.module.scss';
 interface IProps extends SFC {
   total: number;
   loading: boolean;
-  onFilterChange?: any;
-  onSortChange?: any;
   onChange: any;
 }
-
-const orderingType = {
-  recommendation: 'Recommendation',
-  price_in_usd: 'Price Low To High',
-  '-price_in_usd': 'Price High To Low',
-  '-publish_time': 'Publish Time Recent to Old',
-  publish_time: 'Publish Time Old to Recent',
-  distance_to_warehouse: 'Mileage Low to High'
-};
-
-const transmission_group = [
-  { key: 'All', value: 'All' },
-  { key: 'Manual', value: 'Manual' },
-  { key: 'Automatic', value: 'Automatic' }
-];
-
-const vehicle_status_group = [
-  { key: 'All', value: 'All' },
-  { key: 'In Stock', value: '1' },
-  { key: 'Incoming', value: '2' }
-];
-
-const steering_position_group = [
-  { key: 'All', value: 'All' },
-  { key: 'Left', value: 'Left Hand Drive' },
-  { key: 'Right', value: 'Right Hand Drive' }
-];
 
 interface IColor {
   checked: boolean;
@@ -100,21 +71,69 @@ interface IMake {
   results: IMakeItem[];
 }
 
+type _ordering =
+  | 'recommendation'
+  | 'price_in_usd'
+  | '-price_in_usd'
+  | '-publish_time'
+  | 'publish_time'
+  | 'distance_to_warehouse';
+type _transmission = 'All' | 'Manual' | 'Automatic';
+type _car_status = 'All' | '1' | '2';
+type _steering_position = 'All' | 'Left Hand Drive' | 'Right Hand Drive';
+
+const orderingType = {
+  recommendation: 'Recommendation',
+  price_in_usd: 'Price Low To High',
+  '-price_in_usd': 'Price High To Low',
+  '-publish_time': 'Publish Time Recent to Old',
+  publish_time: 'Publish Time Old to Recent',
+  distance_to_warehouse: 'Mileage Low to High'
+};
+
+const transmission_group: Record<'key' | 'value', _transmission>[] = [
+  { key: 'All', value: 'All' },
+  { key: 'Manual', value: 'Manual' },
+  { key: 'Automatic', value: 'Automatic' }
+];
+
+interface IVehicleStatus {
+  key: 'All' | 'In Stock' | 'Incoming';
+  value: _car_status;
+}
+
+const vehicle_status_group: IVehicleStatus[] = [
+  { key: 'All', value: 'All' },
+  { key: 'In Stock', value: '1' },
+  { key: 'Incoming', value: '2' }
+];
+
+interface ISteeringPosition {
+  key: 'All' | 'Left' | 'Right';
+  value: _steering_position;
+}
+
+const steering_position_group: ISteeringPosition[] = [
+  { key: 'All', value: 'All' },
+  { key: 'Left', value: 'Left Hand Drive' },
+  { key: 'Right', value: 'Right Hand Drive' }
+];
+
 interface IState {
   filterMenuShow: boolean;
   sortMenuShow: boolean;
-  ordering: string;
+  ordering: _ordering;
   countries: ICountry[];
   makes: IMake[];
-  yearRange: number[];
-  priceRange: number[];
-  mileageRange: number[];
-  readyToShipRange: number[];
+  yearRange: [number, number];
+  priceRange: [number, number];
+  mileageRange: [number, number];
+  readyToShipRange: [number, number];
   exterior_colors: IColor[];
   interior_colors: IColor[];
-  transmission: string;
-  vehicle_status: string;
-  steering_position: string;
+  transmission: _transmission;
+  vehicle_status: _car_status;
+  steering_position: _steering_position;
   conditions: IConditionItem[];
 }
 
@@ -123,6 +142,24 @@ const _priceRange = [2600, 500000];
 const _yearRange = [nowYear - 20, nowYear + 2];
 const _mileageRange = [0, 500];
 const _readyToShipRange = [0, 60];
+
+const initialState = {
+  filterMenuShow: false,
+  sortMenuShow: false,
+  ordering: 'recommendation' as _ordering,
+  countries: [],
+  makes: [],
+  yearRange: [_yearRange[0], _yearRange[1]] as [number, number],
+  priceRange: [_priceRange[0], _priceRange[1]] as [number, number],
+  mileageRange: [_mileageRange[0], _mileageRange[1]] as [number, number],
+  readyToShipRange: [_readyToShipRange[0], _readyToShipRange[1]] as [number, number],
+  exterior_colors: _colors,
+  interior_colors: _colors,
+  transmission: 'All' as _transmission,
+  vehicle_status: 'All' as _car_status,
+  steering_position: 'All' as _steering_position,
+  conditions: []
+};
 
 enum mapStateKeyToConditionsName {
   countries = 'Country Specification',
@@ -136,21 +173,6 @@ enum mapStateKeyToConditionsName {
   vehicle_status = 'Vehicle Status',
   readyToShipRange = 'Ready to ship in(days)',
   steering_position = 'Steering Position'
-}
-
-enum mapConditionNameToFilterKey {
-  countries = 'specification_location',
-  priceRange = 'price_in_usd',
-  makes = 'make_name',
-  readyToShipRange = 'days_to_warehouse',
-  yearRange = 'model_year',
-  mileageRange = 'distance_to_warehouse',
-  exterior_colors = 'exterior_colors',
-  interior_colors = 'interior_color',
-  transmission = 'transmission',
-  vehicle_status = 'car_type',
-  ordering = 'ordering',
-  steering_position = 'l_or_r'
 }
 
 type TConditions =
@@ -183,26 +205,8 @@ const ConditionItem: SFC<IConditionItem> = ({ type, desc, onClose }) => {
   );
 };
 
-const initialState = {
-  filterMenuShow: false,
-  sortMenuShow: false,
-  ordering: 'recommendation',
-  countries: [],
-  makes: [],
-  yearRange: [_yearRange[0], _yearRange[1]],
-  priceRange: [_priceRange[0], _priceRange[1]],
-  mileageRange: [_mileageRange[0], _mileageRange[1]],
-  readyToShipRange: [_readyToShipRange[0], _readyToShipRange[1]],
-  exterior_colors: _colors,
-  interior_colors: _colors,
-  transmission: 'All',
-  vehicle_status: 'All',
-  steering_position: 'All',
-  conditions: []
-};
-
-class FilterBar extends React.Component<IProps, IState> {
-  readonly state = initialState;
+class FilterBar extends React.PureComponent<IProps, IState> {
+  state = initialState;
   private filter_menu_ref = React.createRef<HTMLDivElement>();
 
   toggleFilterMenu = () => {
@@ -277,9 +281,7 @@ class FilterBar extends React.Component<IProps, IState> {
             : prev.conditions.concat({
                 type: 'Make',
                 desc: item.make.display_value,
-                onClose: () => {
-                  this.onMakeChange({ ...item, checked: true })();
-                }
+                onClose: () => this.onMakeChange({ ...item, checked: true })()
               })
         };
       },
@@ -294,21 +296,14 @@ class FilterBar extends React.Component<IProps, IState> {
     this.setState(
       (prev: IState): IState => {
         const _conditions = ((con: IConditionItem[]) => {
-          const mapKey = {
-            priceRange: 'Price Range',
-            yearRange: 'Model year',
-            mileageRange: 'Mileage(KMs)',
-            readyToShipRange: 'Ready to ship in(days)'
-          };
-          const _key = mapKey[key];
+          const _key = mapStateKeyToConditionsName[key];
           const left = range[0];
           const right = range[1];
           let _con = con.slice();
           const index = _con.findIndex(v => v.type === _key);
-          const targetInitial = left === initialState[key][0] && right === initialState[key][1];
 
-          if (targetInitial) {
-            return _con.filter((v: IConditionItem) => !(v.type === _key));
+          if (left === initialState[key][0] && right === initialState[key][1]) {
+            return _con.filter((v: IConditionItem) => v.type !== _key);
           }
           if (index >= 0) {
             _con[index].desc = `${thousands(left)}-${thousands(right)}`;
@@ -317,23 +312,19 @@ class FilterBar extends React.Component<IProps, IState> {
             _con.push({
               type: _key as TConditions,
               desc: `${thousands(left)}-${thousands(right)}`,
-              onClose: () =>
-                this.setState((prev: IState) => ({
-                  ...prev,
-                  key: initialState[key]
-                }))
+              onClose: () => this.onRangeChange(key)([initialState[key][0], initialState[key][1]])
             });
           }
           return _con;
         })(prev.conditions);
-
+        console.log([key], [range[0], range[1]], _conditions);
         return {
           ...prev,
           [key]: [range[0], range[1]],
           conditions: _conditions
         };
       },
-      () => (shouldUpdate ? this.updateFilter() : console.log('update number!'))
+      () => (shouldUpdate ? this.updateFilter() : null)
     );
 
   onColorChange = (key: 'exterior_colors' | 'interior_colors', item: IColor) => () => {
@@ -356,11 +347,14 @@ class FilterBar extends React.Component<IProps, IState> {
               </div>
             ),
             onClose: () =>
-              this.setState(prev => ({
-                ...prev,
-                conditions: conditions.filter((v: IConditionItem) => !(v.type === _key)),
-                [key]: initialState[key]
-              }))
+              this.setState(
+                (prev: IState) => ({
+                  ...prev,
+                  [key]: initialState[key],
+                  conditions: prev.conditions.filter((it: IConditionItem) => it.type !== _key)
+                }),
+                () => this.updateFilter()
+              )
           });
         }
         if (!isChecked && index !== -1) {
@@ -427,9 +421,14 @@ class FilterBar extends React.Component<IProps, IState> {
                 type: _key as TConditions,
                 desc: `${_next}`,
                 onClose: () =>
-                  this.setState((prev: IState) => ({
-                    conditions: prev.conditions.filter(v => v.type !== _key)
-                  }))
+                  this.setState(
+                    (prev: IState) => ({
+                      ...prev,
+                      [key]: initialState[key],
+                      conditions: prev.conditions.filter(v => v.type !== _key)
+                    }),
+                    () => this.updateFilter()
+                  )
               })
             : (_conditions[index].desc = `${_next}`);
         }
@@ -448,9 +447,11 @@ class FilterBar extends React.Component<IProps, IState> {
     if (this.props.loading) return;
     const sort = (e.target as any).dataset.sort;
     if (sort === this.state.ordering) return;
-    sort && this.setState({ ordering: sort });
-    this.onSortMouseLeave();
-    this.updateFilter();
+    sort &&
+      this.setState({ ordering: sort }, () => {
+        this.onSortMouseLeave();
+        this.updateFilter();
+      });
   };
 
   getCountries = async () => {
@@ -566,7 +567,6 @@ class FilterBar extends React.Component<IProps, IState> {
       l_or_r: steering_position === 'All' ? null : steering_position,
       car_status: vehicle_status === 'All' ? null : vehicle_status
     };
-    console.log('query: ', _query);
     return _query;
   };
 
@@ -898,6 +898,14 @@ class FilterBar extends React.Component<IProps, IState> {
           }`}
         >
           Recommendation
+        </div>
+        <div
+          data-sort={'price_in_usd'}
+          className={`${styles.item} ${
+            ordering === 'price_in_usd' ? styles.sortMenuItemActive : ''
+          }`}
+        >
+          Price Low to High
         </div>
         <div
           data-sort={'-price_in_usd'}

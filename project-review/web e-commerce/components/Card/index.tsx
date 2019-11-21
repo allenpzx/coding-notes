@@ -13,16 +13,17 @@ import { CardType } from './CardTypes';
 import _get from '../../common/get';
 import utils from '../../common/util';
 import { CusPopover } from '../CusPopover';
+import LazyImage from '../LazyImage';
 import styles from './index.module.scss';
 
 const thousands = utils.numberWithCommas;
 
-interface State {
+interface IState {
   logoError: boolean;
 }
 
 @(injectIntl as any)
-class Card extends PureComponent<CardType & SFC, State> {
+class Card extends PureComponent<CardType & SFC, IState> {
   static defaultProps: CardType & SFC;
 
   state = {
@@ -202,7 +203,8 @@ class Card extends PureComponent<CardType & SFC, State> {
           )}
         </div>
 
-        <img src={image} alt="card_cover" className={styles.cover} />
+        {/* <img src={image} alt="card_cover" className={styles.cover} /> */}
+        <LazyImage src={image} alt="card_cover" width={389} height={292} />
 
         <div className={styles.coverBottom}>
           <div className={styles.left}>

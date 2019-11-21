@@ -5,7 +5,7 @@
  * @author zixiu
  */
 
-import React, { SFC } from 'react';
+import React, { SFC, memo } from 'react';
 import styles from './index.module.scss';
 
 export interface IHackCheckBox {
@@ -24,4 +24,4 @@ const HackCheckBox: SFC<IHackCheckBox> = ({ text, checked, onChange }) => {
   );
 };
 
-export default HackCheckBox;
+export default memo(HackCheckBox);

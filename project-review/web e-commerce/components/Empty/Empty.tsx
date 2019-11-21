@@ -22,7 +22,7 @@ interface Props {
 }
 
 @(injectIntl as any)
-class CusEmpty extends React.Component<Props, {}> {
+class CusEmpty extends React.PureComponent<Props, {}> {
   static defaultProps: Props;
 
   render() {

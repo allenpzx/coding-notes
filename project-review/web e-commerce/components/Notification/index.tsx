@@ -5,7 +5,7 @@
  * @author zixiu
  */
 
-import React, { SFC } from 'react';
+import React, { SFC, memo } from 'react';
 import { notification } from 'antd';
 
 interface Props {
