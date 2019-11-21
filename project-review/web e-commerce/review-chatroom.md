@@ -68,7 +68,6 @@
           } = action;
         if (!id) return state;
         const exitItem = activeRoomId.find((d: RoomItem) => d.id === id);
-        console.log('exitItem: ', exitItem);
         if (!!exitItem && _get(exitItem, ['status']) === 'min') {
           return {
             ...state,
@@ -209,7 +208,6 @@
     };
 
     onRoomMessage = (data: any) => {
-      console.log('on_message_from_server: ', data);
       if (
         (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) ||
         (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url']))
@@ -400,7 +398,6 @@ this.inputArea.current && this.inputArea.current.focus();
 
   ```typescript
     const onRoomMessage = (data: any) => {
-      console.log('on_message_from_server: ', data);
       if (
         (_get(data, ['msg_type']) === 1 && _get(data, ['extra', 'content'])) ||
         (_get(data, ['msg_type']) === 2 && _get(data, ['extra', 'url']))

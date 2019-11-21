@@ -317,7 +317,6 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           }
           return _con;
         })(prev.conditions);
-        console.log([key], [range[0], range[1]], _conditions);
         return {
           ...prev,
           [key]: [range[0], range[1]],

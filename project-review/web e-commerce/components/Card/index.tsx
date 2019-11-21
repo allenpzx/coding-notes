@@ -106,17 +106,6 @@ class Card extends PureComponent<CardType & SFC, IState> {
         }
       };
 
-      // CN 用户nego
-      // if (user_company_country === 'CN' && !is_new_car && distance_to_warehouse <= 350) {
-      //   return (
-      //     <div className={styles.price_row}>
-      //       <div className={styles.left}>
-      //         <FormattedMessage id="buy_market_card_negotiable" defaultMessage="NEGOTIABLE" />
-      //       </div>
-      //     </div>
-      //   );
-      // }
-
       if (user_company_country === 'CN' && isSafeMoney(price)) {
         return (
           <div className={styles.price_row}>

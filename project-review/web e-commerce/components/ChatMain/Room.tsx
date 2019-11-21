@@ -399,97 +399,6 @@ export class MaxRoom extends BasicRoom<MaxRoomProps, {}> {
     const { inputContent } = this.state;
     const randomId = uniqueID();
 
-    // const generateHistory = (results: any[]): ReactNode => {
-    //   return results.map((v: any, index: number, arr: any[]) => {
-    //     const bubblePosition =
-    //       _get(v, ["sender", "id"]) === userId ? "left" : "right";
-
-    //     if (v.msg_type === TimeMessageType) {
-    //       return (
-    //         <TimeMessage key={index} time={_get(v, ["extra", "content"])} />
-    //       );
-    //     }
-
-    //     // 特殊的卡片位置
-    //     if (v.msg_type === CarMessageType) {
-    //       return (
-    //         <CarMessage
-    //           key={index}
-    //           carImage={carImage}
-    //           carMakeLogo={carMakeLogo}
-    //           carName={carName}
-    //           carMileage={carMileage}
-    //           carMileageUnit={carMileageUnit}
-    //           carUnit={carUnit}
-    //           carStatus={carStatus}
-    //           orderType={orderType}
-    //         />
-    //       );
-    //     }
-
-    //     // 文本处理
-    //     if (v.msg_type === 1) {
-    //       return (
-    //         <TextMessage
-    //           key={index}
-    //           content={_get(v, ["extra", "content"])}
-    //           headshot={_get(v, ["sender", "headshot"])}
-    //           location={_get(v, ["sender", "company_country"])}
-    //           bubblePosition={bubblePosition}
-    //           messageStatus={_get(v, ["messageStatus"])}
-    //           resendMessage={resendMessage(v)}
-    //         />
-    //       );
-    //     }
-
-    //     // 图片处理
-    //     if (v.msg_type === 2) {
-    //       return (
-    //         <ImageMessage
-    //           key={index}
-    //           url={_get(v, ["extra", "url"])}
-    //           headshot={_get(v, ["sender", "headshot"])}
-    //           location={_get(v, ["sender", "company_country"])}
-    //           bubblePosition={bubblePosition}
-    //           onLoad={() => {
-    //             if (index > arr.length - 9) {
-    //               console.log("image max");
-    //               this.scrollToBottom();
-    //             }
-    //           }}
-    //         />
-    //       );
-    //     }
-
-    //     // offer 处理
-    //     if (v.msg_type === 6) {
-    //       return (
-    //         <OfferMessage
-    //           key={index}
-    //           headshot={_get(v, ["sender", "headshot"])}
-    //           location={_get(v, ["sender", "company_country"])}
-    //           children={<OfferBubble chatroom={chatroom} result={v} />}
-    //           bubblePosition={bubblePosition}
-    //           hideAvatar={false}
-    //         />
-    //       );
-    //     }
-
-    //     // offer success
-    //     if (v.msg_type === 8) {
-    //       return (
-    //         <OfferMessage
-    //           key={index}
-    //           headshot={require("../../assets/img/chat_system_avatar.png")}
-    //           // location={_get(v, ['sender', 'company_country'])}
-    //           children={<OfferSuccess text={_get(v, ["extra", "content"])} />}
-    //           bubblePosition="left"
-    //           hideAvatar={false}
-    //         />
-    //       );
-    //     }
-    //   });
-    // };
     return (
       <article className={styles.container_max}>
         <header className={styles.header_max}>
@@ -622,78 +531,6 @@ export class CommonRoom extends BasicRoom<CommonRoomProps, {}> {
     } = this.props;
     const { inputContent } = this.state;
     const randomId = uniqueID();
-    // const generateHistory = (results: MessageProps[]): ReactNode => {
-    //   return results.map((v: any, index: number, arr: any[]) => {
-    //     if (v.msg_type === "timeMessage") {
-    //       return (
-    //         <TimeMessage key={index} time={_get(v, ["extra", "content"])} />
-    //       );
-    //     }
-
-    //     // 文本处理
-    //     if (v.msg_type === 1) {
-    //       return (
-    //         <TextMessage
-    //           key={index}
-    //           content={_get(v, ["extra", "content"])}
-    //           headshot={_get(v, ["sender", "headshot"])}
-    //           location={_get(v, ["sender", "company_country"])}
-    //           bubblePosition="right"
-    //           bubbleColor={
-    //             _get(v, ["sender", "id"]) === userId ? "blue" : "white"
-    //           }
-    //           messageStatus={_get(v, ["messageStatus"])}
-    //           resendMessage={resendMessage(v)}
-    //         />
-    //       );
-    //     }
-
-    //     // 图片处理
-    //     if (v.msg_type === 2) {
-    //       return (
-    //         <ImageMessage
-    //           key={index}
-    //           url={_get(v, ["extra", "url"])}
-    //           headshot={_get(v, ["sender", "headshot"])}
-    //           location={_get(v, ["sender", "company_country"])}
-    //           bubblePosition="right"
-    //           onLoad={() => {
-    //             if (index > arr.length - RoomPageSize && results.length < RoomPageSize) {
-    //               this.scrollToBottom();
-    //             }
-    //           }}
-    //         />
-    //       );
-    //     }
-
-    //     // offer 处理
-    //     if (v.msg_type === 6) {
-    //       return (
-    //         <OfferMessage
-    //           key={index}
-    //           headshot={_get(v, ["sender", "headshot"])}
-    //           location={_get(v, ["sender", "company_country"])}
-    //           children={<OfferBubble chatroom={chatroom} result={v} />}
-    //           bubblePosition={"right"}
-    //           hideAvatar={false}
-    //         />
-    //       );
-    //     }
-
-    //     if (v.msg_type === 8) {
-    //       return (
-    //         <OfferMessage
-    //           key={index}
-    //           headshot={require("../../assets/img/chat_system_avatar.png")}
-    //           // location={_get(v, ['sender', 'company_country'])}
-    //           children={<OfferSuccess text={_get(v, ["extra", "content"])} />}
-    //           bubblePosition="right"
-    //           hideAvatar={false}
-    //         />
-    //       );
-    //     }
-    //   });
-    // };
 
     return (
       <article className={styles.container_common}>
@@ -725,14 +562,6 @@ export class CommonRoom extends BasicRoom<CommonRoomProps, {}> {
 
           <div className={styles.btnGroup}>
             <IconFont type="iconicon_minus_line_thin" className={styles.btn} />
-            {/* <IconFont
-              type="iconicon_fullscreen"
-              className={styles.btn}
-              onClick={(e: React.MouseEvent<HTMLElement>) => {
-                e.stopPropagation();
-                maxRoom();
-              }}
-            /> */}
             <IconFont
               type="iconicon_cancel"
               className={styles.btn}

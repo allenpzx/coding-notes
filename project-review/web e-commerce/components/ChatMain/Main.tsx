@@ -162,7 +162,6 @@ class ChatMain extends React.Component<ContainerProps, ContainerState> {
   };
 
   onRoomMessage = (data: any) => {
-    // console.log('on_message_from_server: ', data);
     const msg_type = _get(data, ['msg_type']);
     if (
       (msg_type === 1 && _get(data, ['extra', 'content'])) ||

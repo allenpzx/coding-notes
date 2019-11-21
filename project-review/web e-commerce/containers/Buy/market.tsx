@@ -180,7 +180,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
 
   onCardBottomClick = (arg: any) => (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    console.log(arg, '留着给聊天需求用的');
+    // console.log(arg, '留着给聊天需求用的');
   };
 
   componentWillUnmount() {
