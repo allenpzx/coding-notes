@@ -5,9 +5,9 @@
  * @version 1.0
  */
 
-import React, { SFC } from 'react';
-import { Skeleton } from 'antd';
-import styles from './index.module.scss';
+import React, { SFC } from "react";
+import { Skeleton } from "antd";
+import styles from "./index.module.scss";
 
 class Card extends React.Component<SFC, {}> {
   render() {
@@ -17,7 +17,12 @@ class Card extends React.Component<SFC, {}> {
           .fill(1)
           .map((v, i) => (
             <div className={styles.cardLoading} key={i}>
-              <Skeleton className={styles.hackSkeleton} loading active paragraph={{ rows: 10 }} />
+              <Skeleton
+                className={styles.hackSkeleton}
+                loading
+                active
+                paragraph={{ rows: 10 }}
+              />
             </div>
           ))}
       </div>

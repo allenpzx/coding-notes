@@ -12,16 +12,10 @@ import Icon from '../Icon';
 import styles from './Empty.module.scss';
 
 interface Props {
-  emptyType:
-    | 'empty_search'
-    | 'empty_filter'
-    | 'empty_market'
-    | 'empty_garage'
-    | 'empty_homepage';
+  emptyType: 'empty_search' | 'empty_filter' | 'empty_market' | 'empty_garage' | 'empty_homepage';
   intl: IntlShape;
 }
 
-@(injectIntl as any)
 class CusEmpty extends React.PureComponent<Props, {}> {
   static defaultProps: Props;
 
@@ -45,14 +39,10 @@ class CusEmpty extends React.PureComponent<Props, {}> {
     );
     return (
       <div className={styles.emptyContainer}>
-        <Empty
-          description={description}
-          image={image}
-          className={styles.emptyIcon}
-        />
+        <Empty description={description} image={image} className={styles.emptyIcon} />
       </div>
     );
   }
 }
 
-export default CusEmpty;
+export default injectIntl(CusEmpty);

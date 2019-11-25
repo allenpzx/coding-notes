@@ -1,0 +1,170 @@
+@import '../../../assets/style/config.scss';
+
+.ChatBuyItemBox {
+  &__header {
+    @include flex;
+    justify-content: flex-start;
+    height: 82px;
+    padding: 16px 12px;
+    border-bottom: 1px solid $borderGray;
+    @include cursor;
+    position: relative;
+    .leftBox {
+      display: inline-block;
+      position: relative;
+      margin-right: 12px;
+    }
+
+    .headbox {
+      width: 50px;
+      height: 50px;
+      position: relative;
+      border-radius: 50%;
+      .headshadBox {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border: solid 1px rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      .userHead {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .headMsgNum {
+      top: 0;
+      right: 0;
+      z-index: 2;
+    }
+    .cont {
+      height: 100%;
+      //margin: 0 auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      max-width: 215px;
+    }
+    .userName {
+      font-size: 16px;
+      font-weight: 500;
+      color: $black;
+      margin-right: auto;
+      margin-bottom: 8px;
+    }
+  }
+  &__content {
+    background: #f7f7f7;
+    .orderCarItem {
+      padding: 12px 12px 8px;
+      //box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+      @include flex;
+      height: 116px;
+      position: relative;
+      overflow: hidden;
+      &:hover {
+        background: $borderGray;
+      }
+      &:not(:last-of-type) {
+        border-bottom: 1px solid $borderGray;
+      }
+      .carImgBox {
+        flex-grow: 0;
+        flex-shrink: 0;
+        width: 80px;
+        height: 60px;
+        margin-right: 10px;
+        border: 1px solid $borderGray;
+        @include flexCenter;
+        .carImg {
+          object-fit: cover;
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .orderCarinfo {
+        width: 150px;
+        flex: auto;
+        .carName {
+          color: $black;
+          font-size: 14px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin-bottom: 5px;
+          @include fontSFBold;
+        }
+        .milesAtag {
+          @include flexAlignCenter;
+          margin-bottom: 5px;
+          margin-right: -20px;
+          .mileage {
+            @include fontSFPro;
+            margin-right: 8px;
+            font-size: 14px;
+          }
+        }
+        .carPrice {
+          color: $fontGray;
+          font-size: 12px;
+          margin-bottom: 5px;
+          @include fontSFPro;
+        }
+      }
+    }
+  }
+}
+
+.orderTag {
+  font-size: 12px;
+  height: 18px;
+  line-height: 16px;
+  //transform: scale(0.9);
+  border: 1px solid $blue;
+  border-radius: 2px;
+  color: $blue;
+  padding: 0 5px;
+  display: inline-block;
+  font-weight: 600;
+  @include fontSFPro;
+}
+
+.orderMsgNum {
+  left: 8px;
+  top: 8px;
+}
+
+.location {
+  width: 19px;
+  height: 14px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.headLastMsg {
+  width: 234px;
+  @include flexAlignCenter;
+  margin-bottom: 0;
+  @include fontSFPro;
+}
+
+.lastMsgCon {
+  color: $black;
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.conLastMsg {
+  width: 206px;
+  @include flexAlignCenter;
+  margin-bottom: 0;
+  @include fontSFPro;
+}

@@ -1,0 +1,140 @@
+@import '../../../assets/style/config.scss';
+
+.ChatBox {
+  width: 320px;
+  position: fixed;
+  right: 40px;
+  bottom: 0;
+  z-index: $chatBasicZIndex - 1;
+  box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+  &__Header {
+    @include flexAlignCenter;
+    background-color: $black;
+    height: 58px;
+    padding: 12px 12px;
+    color: $white;
+    position: relative;
+    .userHead {
+      margin-right: 12px;
+      border: solid 1px rgba(255, 255, 255, 0.5);
+    }
+    .userName {
+      margin-right: auto;
+    }
+    .fullscreen {
+      @include cursor;
+      font-size: 20px;
+      margin-right: 12px;
+      align-self: flex-start;
+    }
+    .cancel {
+      align-self: flex-start;
+      @include cursor;
+      font-size: 20px;
+    }
+    .location {
+      position: absolute;
+      width: 16px;
+      left: 28px;
+      top: 32px;
+      z-index: 1;
+    }
+  }
+  &__title {
+    background: $white;
+    @include flexAlignCenter;
+    height: 50px;
+    border-bottom: 1px solid $borderGray;
+    &__item {
+      @include flexCenter;
+      height: 100%;
+      width: 50%;
+      text-align: center;
+      color: $black;
+      font-size: 16px;
+      border-bottom: 2px solid $white;
+      .box {
+        @include cursor;
+        @include flexAlignCenter;
+        height: 100%;
+        position: relative;
+        padding: 0 11px;
+        .MenuItem {
+          @include fontSFPro;
+          font-weight: 500;
+          font-size: 16px;
+        }
+      }
+    }
+    .itemPre {
+      font-size: 24px;
+      margin-right: 5px;
+    }
+
+    .titleMsgNum {
+      right: 0px;
+      top: 4px;
+    }
+  }
+  &__Content {
+    height: 532px;
+    background: $white;
+    position: relative;
+  }
+}
+
+.menuItemActive {
+  color: $iconBlue;
+  border-bottom: 2px solid $iconBlue;
+}
+
+.msgBox {
+  position: relative;
+}
+
+.chatMinBox {
+  width: 280px;
+  height: 58px;
+  position: fixed;
+  right: 40px;
+  bottom: 0;
+  z-index: 1;
+  box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+  padding: 16px 16px 16px 18px;
+  border-radius: 4px;
+  background-color: #00274d;
+  color: $white;
+  @include flexAlignCenter;
+  .commentHintBox {
+    margin-right: 14px;
+    color: $blue;
+    position: relative;
+    .comment {
+      font-size: 28px;
+    }
+    .TrackPoint {
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      width: 10px;
+      height: 10px;
+      background: $iconRed;
+      border-radius: 50%;
+    }
+  }
+
+  .allMsgNum {
+    font-size: 16px;
+    margin-right: auto;
+  }
+
+  .fullscreen {
+    font-size: 20px;
+    margin-top: -5px;
+    margin-left: auto;
+  }
+}
+
+.hide {
+  display: none;
+}

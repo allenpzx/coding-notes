@@ -1,13 +1,13 @@
-import React from 'react';
-import { UserInfoStore } from '../../store/types';
-import { injectIntl, IntlShape } from 'react-intl';
+import React from "react";
+import { UserInfoStore } from "../../store/types";
+import { injectIntl, IntlShape } from "react-intl";
 
-export type RoomStatus = 'max' | 'min' | 'common';
-export type MessageType = 'text' | 'image' | 'offer' | 'car' | 'time';
-export type MessageStatus = 'pending' | 'success' | 'error';
+export type RoomStatus = "max" | "min" | "common";
+export type MessageType = "text" | "image" | "offer" | "car" | "time";
+export type MessageStatus = "pending" | "success" | "error";
 export const RoomPageSize = 10;
-export const CarMessageType = 'carMessage';
-export const TimeMessageType = 'timeMessage';
+export const CarMessageType = "carMessage";
+export const TimeMessageType = "timeMessage";
 export const message_display_type = [1, 2, 6, 8, 9];
 export const message_type = [1, 2, 6, 7, 8, 9];
 
@@ -51,7 +51,18 @@ export function uniqueID() {
       .slice(-4);
   }
   return (
-    chr4() + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + chr4() + chr4()
+    chr4() +
+    chr4() +
+    "-" +
+    chr4() +
+    "-" +
+    chr4() +
+    "-" +
+    chr4() +
+    "-" +
+    chr4() +
+    chr4() +
+    chr4()
   );
 }
 
@@ -61,7 +72,9 @@ export const timeTo24 = (time: string) => {
   const t = new Date(time);
   const hours = t.getHours();
   const minutes = t.getMinutes();
-  return `${hours < 10 ? '0' : ''}${hours || ''}:${minutes < 10 ? '0' : ''}${minutes || ''}`;
+  return `${hours < 10 ? "0" : ""}${hours || ""}:${
+    minutes < 10 ? "0" : ""
+  }${minutes || ""}`;
 };
 
 interface IGetLocalTimeProps {
@@ -73,25 +86,30 @@ interface IGetLocalTimeState {
   now: string;
 }
 
-@(injectIntl as any)
-export class GetLocalTime extends React.Component<IGetLocalTimeProps, IGetLocalTimeState> {
+class GetLocalTimeClass extends React.Component<
+  IGetLocalTimeProps,
+  IGetLocalTimeState
+> {
   static defaultProps: IGetLocalTimeProps;
   private timer: any;
   state = {
-    now: ''
+    now: ""
   };
 
   getNow = () =>
     this.props.intl.formatTime(Date.now(), {
       timeZone: this.props.timezone,
-      hour: 'numeric',
-      minute: 'numeric',
+      hour: "numeric",
+      minute: "numeric",
       hour12: false
     });
 
   componentDidMount() {
     this.setState({ now: this.getNow() });
-    const timer = setInterval(() => this.setState({ now: this.getNow() }), 60000);
+    const timer = setInterval(
+      () => this.setState({ now: this.getNow() }),
+      60000
+    );
     this.timer = timer;
   }
 
@@ -104,8 +122,10 @@ export class GetLocalTime extends React.Component<IGetLocalTimeProps, IGetLocalT
   }
 }
 
+export const GetLocalTime = injectIntl(GetLocalTimeClass);
+
 export const getJoinedTime = (last: string) => {
-  if (!last) return '';
+  if (!last) return "";
   const originPrev = new Date(Number(last));
   const prev = originPrev.getTime();
   const now = Date.now();
@@ -142,7 +162,11 @@ export const getJoinedTime = (last: string) => {
   return `1 year ago`;
 };
 
-export const getMessageTime = (left: string, right: string, min_interval = 10) => {
+export const getMessageTime = (
+  left: string,
+  right: string,
+  min_interval = 10
+) => {
   if (!left && !right) return false;
   const originLeft = new Date(Number(left));
   const left_time = originLeft.getTime();
@@ -164,10 +188,18 @@ export const getMessageTime = (left: string, right: string, min_interval = 10) =
   const right_date = originRight.getDate();
   const right_year = originRight.getFullYear();
   const year = `${originRight.getFullYear()}`;
-  const month = `${originRight.getMonth() + 1 < 10 ? '0' : ''}${originRight.getMonth() + 1}`;
-  const day = `${originRight.getDate() < 10 ? '0' : ''}${originRight.getDate()}`;
-  const hour = `${originRight.getHours() < 10 ? '0' : ''}${originRight.getHours()}`;
-  const minute = `${originRight.getMinutes() < 10 ? '0' : ''}${originRight.getMinutes()}`;
+  const month = `${
+    originRight.getMonth() + 1 < 10 ? "0" : ""
+  }${originRight.getMonth() + 1}`;
+  const day = `${
+    originRight.getDate() < 10 ? "0" : ""
+  }${originRight.getDate()}`;
+  const hour = `${
+    originRight.getHours() < 10 ? "0" : ""
+  }${originRight.getHours()}`;
+  const minute = `${
+    originRight.getMinutes() < 10 ? "0" : ""
+  }${originRight.getMinutes()}`;
 
   if (right_date === now_date) {
     return `${hour}:${minute}`;
@@ -184,7 +216,9 @@ export const getMessageTime = (left: string, right: string, min_interval = 10) =
 export const base64ToBlob = (base64Image: string) =>
   fetch(base64Image)
     .then(res => res.blob())
-    .then(blob => new File([blob], `image_from_chat.${blob.type.split('/')[1]}`));
+    .then(
+      blob => new File([blob], `image_from_chat.${blob.type.split("/")[1]}`)
+    );
 
 export interface RoomProps extends React.SFC {
   id: string;
@@ -238,7 +272,11 @@ export interface MinRoomProps extends RoomProps {
   closeRoom: () => any;
 }
 
-export type TSendImageMessage = (data: FormData, base64Image: string, uuid: string) => void;
+export type TSendImageMessage = (
+  data: FormData,
+  base64Image: string,
+  uuid: string
+) => void;
 export type TSendTextMessage = (message_id: string) => void;
 export type TReSendMessage = (
   message: MessageProps

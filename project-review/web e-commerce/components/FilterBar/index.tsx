@@ -5,18 +5,18 @@
  * @author zixiu
  */
 
-import React, { SFC, MouseEvent, ReactNode } from 'react';
-import { Spin } from 'antd';
-import IconFont from '../ui/TradexIcon';
-import { getCountrySpecs, getMakes } from '../../api/searchBar';
-import _get from '../../common/get';
-import HackCheckBox from '../CheckBox';
-import SliderInput from '../SliderInput';
-import RadioBtn from '../RadioBtn';
-import thousands from '../../common/thousands';
-import { Notification } from '../Notification';
-import { compose } from 'redux';
-import styles from './index.module.scss';
+import React, { SFC, MouseEvent, ReactNode } from "react";
+import { Spin } from "antd";
+import IconFont from "../ui/TradexIcon";
+import { getCountrySpecs, getMakes } from "../../api/searchBar";
+import _get from "../../common/get";
+import HackCheckBox from "../CheckBox";
+import SliderInput from "../SliderInput";
+import RadioBtn from "../RadioBtn";
+import thousands from "../../common/thousands";
+import { Notification } from "../Notification";
+import { compose } from "redux";
+import styles from "./index.module.scss";
 
 interface IProps extends SFC {
   total: number;
@@ -31,14 +31,14 @@ interface IColor {
 }
 
 const colors = {
-  White: 'F9F6F6',
-  Black: '333538',
-  Silvery: '9BA5AE',
-  Blue: '4A90E2',
-  Brown: '7E6E65',
-  Red: 'E5515A',
-  Yellow: 'F5CD23',
-  Green: '21C442'
+  White: "F9F6F6",
+  Black: "333538",
+  Silvery: "9BA5AE",
+  Blue: "4A90E2",
+  Brown: "7E6E65",
+  Red: "E5515A",
+  Yellow: "F5CD23",
+  Green: "21C442"
 };
 
 const _colors: IColor[] = Object.entries(colors).map(([k, v]) => ({
@@ -72,51 +72,51 @@ interface IMake {
 }
 
 type _ordering =
-  | 'recommendation'
-  | 'price_in_usd'
-  | '-price_in_usd'
-  | '-publish_time'
-  | 'publish_time'
-  | 'distance_to_warehouse';
-type _transmission = 'All' | 'Manual' | 'Automatic';
-type _car_status = 'All' | '1' | '2';
-type _steering_position = 'All' | 'Left Hand Drive' | 'Right Hand Drive';
+  | "recommendation"
+  | "price_in_usd"
+  | "-price_in_usd"
+  | "-publish_time"
+  | "publish_time"
+  | "distance_to_warehouse";
+type _transmission = "All" | "Manual" | "Automatic";
+type _car_status = "All" | "1" | "2";
+type _steering_position = "All" | "Left Hand Drive" | "Right Hand Drive";
 
 const orderingType = {
-  recommendation: 'Recommendation',
-  price_in_usd: 'Price Low To High',
-  '-price_in_usd': 'Price High To Low',
-  '-publish_time': 'Publish Time Recent to Old',
-  publish_time: 'Publish Time Old to Recent',
-  distance_to_warehouse: 'Mileage Low to High'
+  recommendation: "Recommendation",
+  price_in_usd: "Price Low To High",
+  "-price_in_usd": "Price High To Low",
+  "-publish_time": "Publish Time Recent to Old",
+  publish_time: "Publish Time Old to Recent",
+  distance_to_warehouse: "Mileage Low to High"
 };
 
-const transmission_group: Record<'key' | 'value', _transmission>[] = [
-  { key: 'All', value: 'All' },
-  { key: 'Manual', value: 'Manual' },
-  { key: 'Automatic', value: 'Automatic' }
+const transmission_group: Record<"key" | "value", _transmission>[] = [
+  { key: "All", value: "All" },
+  { key: "Manual", value: "Manual" },
+  { key: "Automatic", value: "Automatic" }
 ];
 
 interface IVehicleStatus {
-  key: 'All' | 'In Stock' | 'Incoming';
+  key: "All" | "In Stock" | "Incoming";
   value: _car_status;
 }
 
 const vehicle_status_group: IVehicleStatus[] = [
-  { key: 'All', value: 'All' },
-  { key: 'In Stock', value: '1' },
-  { key: 'Incoming', value: '2' }
+  { key: "All", value: "All" },
+  { key: "In Stock", value: "1" },
+  { key: "Incoming", value: "2" }
 ];
 
 interface ISteeringPosition {
-  key: 'All' | 'Left' | 'Right';
+  key: "All" | "Left" | "Right";
   value: _steering_position;
 }
 
 const steering_position_group: ISteeringPosition[] = [
-  { key: 'All', value: 'All' },
-  { key: 'Left', value: 'Left Hand Drive' },
-  { key: 'Right', value: 'Right Hand Drive' }
+  { key: "All", value: "All" },
+  { key: "Left", value: "Left Hand Drive" },
+  { key: "Right", value: "Right Hand Drive" }
 ];
 
 interface IState {
@@ -146,46 +146,49 @@ const _readyToShipRange = [0, 60];
 const initialState = {
   filterMenuShow: false,
   sortMenuShow: false,
-  ordering: 'recommendation' as _ordering,
+  ordering: "recommendation" as _ordering,
   countries: [],
   makes: [],
   yearRange: [_yearRange[0], _yearRange[1]] as [number, number],
   priceRange: [_priceRange[0], _priceRange[1]] as [number, number],
   mileageRange: [_mileageRange[0], _mileageRange[1]] as [number, number],
-  readyToShipRange: [_readyToShipRange[0], _readyToShipRange[1]] as [number, number],
+  readyToShipRange: [_readyToShipRange[0], _readyToShipRange[1]] as [
+    number,
+    number
+  ],
   exterior_colors: _colors,
   interior_colors: _colors,
-  transmission: 'All' as _transmission,
-  vehicle_status: 'All' as _car_status,
-  steering_position: 'All' as _steering_position,
+  transmission: "All" as _transmission,
+  vehicle_status: "All" as _car_status,
+  steering_position: "All" as _steering_position,
   conditions: []
 };
 
 enum mapStateKeyToConditionsName {
-  countries = 'Country Specification',
-  makes = 'Make',
-  priceRange = 'Price Range',
-  yearRange = 'Model year',
-  mileageRange = 'Mileage(KMs)',
-  exterior_colors = 'Exterior Color',
-  interior_colors = 'Interior Color',
-  transmission = 'Transmission',
-  vehicle_status = 'Vehicle Status',
-  readyToShipRange = 'Ready to ship in(days)',
-  steering_position = 'Steering Position'
+  countries = "Country Specification",
+  makes = "Make",
+  priceRange = "Price Range",
+  yearRange = "Model year",
+  mileageRange = "Mileage(KMs)",
+  exterior_colors = "Exterior Color",
+  interior_colors = "Interior Color",
+  transmission = "Transmission",
+  vehicle_status = "Vehicle Status",
+  readyToShipRange = "Ready to ship in(days)",
+  steering_position = "Steering Position"
 }
 
 type TConditions =
-  | 'Country Specification'
-  | 'Make'
-  | 'Price Range'
-  | 'Model year'
-  | 'Mileage(KMs)'
-  | 'Exterior Color'
-  | 'Interior Color'
-  | 'Transmission'
-  | 'Vehicle Status'
-  | 'Ready to ship in(days)';
+  | "Country Specification"
+  | "Make"
+  | "Price Range"
+  | "Model year"
+  | "Mileage(KMs)"
+  | "Exterior Color"
+  | "Interior Color"
+  | "Transmission"
+  | "Vehicle Status"
+  | "Ready to ship in(days)";
 
 interface IConditionItem {
   type: TConditions;
@@ -237,19 +240,20 @@ class FilterBar extends React.PureComponent<IProps, IState> {
     this.setState(
       (prev: IState) => ({
         countries: prev.countries.map((v: ICountry) =>
-          v.specification_location.display_value === item.specification_location.display_value
+          v.specification_location.display_value ===
+          item.specification_location.display_value
             ? { ...v, checked: !v.checked }
             : v
         ),
         conditions: item.checked
           ? prev.conditions.filter((v: IConditionItem) =>
-              v.type === 'Country Specification' &&
+              v.type === "Country Specification" &&
               v.desc === item.specification_location.display_value
                 ? false
                 : true
             )
           : prev.conditions.concat({
-              type: 'Country Specification',
+              type: "Country Specification",
               desc: item.specification_location.display_value,
               onClose: () => this.onCountryChange({ ...item, checked: true })()
             })
@@ -276,10 +280,12 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           makes: next_makes,
           conditions: isChecked
             ? prev.conditions.filter((v: IConditionItem) =>
-                v.type === 'Make' && v.desc === item.make.display_value ? false : true
+                v.type === "Make" && v.desc === item.make.display_value
+                  ? false
+                  : true
               )
             : prev.conditions.concat({
-                type: 'Make',
+                type: "Make",
                 desc: item.make.display_value,
                 onClose: () => this.onMakeChange({ ...item, checked: true })()
               })
@@ -290,7 +296,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
   };
 
   onRangeChange = (
-    key: 'priceRange' | 'yearRange' | 'mileageRange' | 'readyToShipRange',
+    key: "priceRange" | "yearRange" | "mileageRange" | "readyToShipRange",
     shouldUpdate = true
   ) => (range: [number, number]) =>
     this.setState(
@@ -312,7 +318,11 @@ class FilterBar extends React.PureComponent<IProps, IState> {
             _con.push({
               type: _key as TConditions,
               desc: `${thousands(left)}-${thousands(right)}`,
-              onClose: () => this.onRangeChange(key)([initialState[key][0], initialState[key][1]])
+              onClose: () =>
+                this.onRangeChange(key)([
+                  initialState[key][0],
+                  initialState[key][1]
+                ])
             });
           }
           return _con;
@@ -326,13 +336,18 @@ class FilterBar extends React.PureComponent<IProps, IState> {
       () => (shouldUpdate ? this.updateFilter() : null)
     );
 
-  onColorChange = (key: 'exterior_colors' | 'interior_colors', item: IColor) => () => {
+  onColorChange = (
+    key: "exterior_colors" | "interior_colors",
+    item: IColor
+  ) => () => {
     this.setState(
       (prev: IState): IState => {
         let conditions = prev.conditions.slice();
         const isChecked = item.checked;
         const _key = mapStateKeyToConditionsName[key];
-        const index = conditions.findIndex((v: IConditionItem) => v.type === _key);
+        const index = conditions.findIndex(
+          (v: IConditionItem) => v.type === _key
+        );
 
         if (!isChecked && index === -1) {
           conditions.push({
@@ -350,7 +365,9 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 (prev: IState) => ({
                   ...prev,
                   [key]: initialState[key],
-                  conditions: prev.conditions.filter((it: IConditionItem) => it.type !== _key)
+                  conditions: prev.conditions.filter(
+                    (it: IConditionItem) => it.type !== _key
+                  )
                 }),
                 () => this.updateFilter()
               )
@@ -373,7 +390,9 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           );
         }
         if (isChecked) {
-          const _next = prev[key].filter((v: IColor) => v.checked && v.value !== item.value);
+          const _next = prev[key].filter(
+            (v: IColor) => v.checked && v.value !== item.value
+          );
           if (_next.length > 0) {
             conditions[index].desc = (
               <div className={styles.inlineBlock}>
@@ -388,13 +407,17 @@ class FilterBar extends React.PureComponent<IProps, IState> {
             );
           }
           if (_next.length === 0) {
-            conditions = conditions.filter((v: IConditionItem) => v.type !== _key);
+            conditions = conditions.filter(
+              (v: IConditionItem) => v.type !== _key
+            );
           }
         }
 
         return {
           ...prev,
-          [key]: prev[key].map(v => (v.value === item.value ? { ...v, checked: !v.checked } : v)),
+          [key]: prev[key].map(v =>
+            v.value === item.value ? { ...v, checked: !v.checked } : v
+          ),
           conditions: conditions
         };
       },
@@ -402,19 +425,23 @@ class FilterBar extends React.PureComponent<IProps, IState> {
     );
   };
 
-  onRadioChange = (key: 'transmission' | 'vehicle_status' | 'steering_position') => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  onRadioChange = (
+    key: "transmission" | "vehicle_status" | "steering_position"
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState(
       (prev: IState): IState => {
         const _next = e.target.value;
         const _key = mapStateKeyToConditionsName[key];
         let _conditions = prev.conditions.slice();
-        const index = _conditions.findIndex((v: IConditionItem) => v.type === _key);
-        if (_next === 'All') {
-          _conditions = _conditions.filter((v: IConditionItem) => v.type !== _key);
+        const index = _conditions.findIndex(
+          (v: IConditionItem) => v.type === _key
+        );
+        if (_next === "All") {
+          _conditions = _conditions.filter(
+            (v: IConditionItem) => v.type !== _key
+          );
         }
-        if (_next !== 'All') {
+        if (_next !== "All") {
           index === -1
             ? _conditions.push({
                 type: _key as TConditions,
@@ -456,7 +483,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
   getCountries = async () => {
     try {
       const { data, status } = await getCountrySpecs();
-      const res = _get(data, ['results']);
+      const res = _get(data, ["results"]);
       status === 200 &&
         res &&
         this.setState({
@@ -464,9 +491,9 @@ class FilterBar extends React.PureComponent<IProps, IState> {
         });
     } catch (error) {
       Notification({
-        type: 'error',
-        message: 'Get menu config error',
-        description: _get(error, ['response', 'data', 'detail'])
+        type: "error",
+        message: "Get menu config error",
+        description: _get(error, ["response", "data", "detail"])
       });
     }
   };
@@ -474,7 +501,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
   getMakes = async () => {
     try {
       const { data, status } = await getMakes();
-      const res = _get(data, ['results']);
+      const res = _get(data, ["results"]);
       status === 200 &&
         res &&
         this.setState({
@@ -488,18 +515,19 @@ class FilterBar extends React.PureComponent<IProps, IState> {
         });
     } catch (error) {
       Notification({
-        type: 'error',
-        message: 'Get menu config error',
-        description: _get(error, ['response', 'data', 'detail'])
+        type: "error",
+        message: "Get menu config error",
+        description: _get(error, ["response", "data", "detail"])
       });
     }
   };
 
   setDynamicHeight = () => {
-    const main = document.getElementById('basic_layout_main');
+    const main = document.getElementById("basic_layout_main");
     const filter_bar = this.filter_menu_ref.current;
     if (main && filter_bar) {
-      const _target = (filter_bar as HTMLDivElement).clientHeight || 1069 + 80 + 32;
+      const _target =
+        (filter_bar as HTMLDivElement).clientHeight || 1069 + 80 + 32;
       (main as any).style.minHeight = `${_target}px`;
     }
   };
@@ -516,7 +544,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
       steering_position
     } = this.state;
     const _query = {
-      ordering: ordering === 'recommendation' ? '' : ordering,
+      ordering: ordering === "recommendation" ? "" : ordering,
       price_in_usd:
         priceRange[0] !== _priceRange[0] || priceRange[1] !== _priceRange[1]
           ? `${priceRange[0]} ${priceRange[1]}`
@@ -526,32 +554,35 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           ? `${yearRange[0]} ${yearRange[1]}`
           : null,
       distance_to_warehouse:
-        mileageRange[0] !== _mileageRange[0] || mileageRange[1] !== _mileageRange[1]
+        mileageRange[0] !== _mileageRange[0] ||
+        mileageRange[1] !== _mileageRange[1]
           ? `${mileageRange[0]} ${mileageRange[1]}`
           : null,
       days_to_warehouse:
-        readyToShipRange[0] !== readyToShipRange[0] || readyToShipRange[1] !== readyToShipRange[1]
+        readyToShipRange[0] !== readyToShipRange[0] ||
+        readyToShipRange[1] !== readyToShipRange[1]
           ? `${readyToShipRange[0]} ${readyToShipRange[1]}`
           : null,
       specification_location:
         this.checked_countries.length > 0
           ? this.checked_countries.reduce(
-              (prev: string, curr: ICountry) => `${prev} ${curr.specification_location.key}`,
-              ''
+              (prev: string, curr: ICountry) =>
+                `${prev} ${curr.specification_location.key}`,
+              ""
             )
           : null,
       make_name:
         this.checked_makes.length > 0
           ? this.checked_makes.reduce(
               (prev: string, curr: IMakeItem) => `${prev} ${curr.make.key}`,
-              ''
+              ""
             )
           : null,
       exterior_colors:
         this.checked_exterior_colors.length > 0
           ? this.checked_exterior_colors.reduce(
               (prev: string, curr: IColor) => `${prev} ${curr.value}`,
-              ''
+              ""
             )
           : null,
 
@@ -559,12 +590,12 @@ class FilterBar extends React.PureComponent<IProps, IState> {
         this.checked_interior_colors.length > 0
           ? this.checked_interior_colors.reduce(
               (prev: string, curr: IColor) => `${prev} ${curr.value}`,
-              ''
+              ""
             )
           : null,
-      transmission: transmission === 'All' ? null : transmission,
-      l_or_r: steering_position === 'All' ? null : steering_position,
-      car_status: vehicle_status === 'All' ? null : vehicle_status
+      transmission: transmission === "All" ? null : transmission,
+      l_or_r: steering_position === "All" ? null : steering_position,
+      car_status: vehicle_status === "All" ? null : vehicle_status
     };
     return _query;
   };
@@ -629,7 +660,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
       <div className={styles.filterMenuWrap}>
         <div
           className={`${styles.filterMenu} 
-          ${filterMenuShow ? styles.filterShow : ''}
+          ${filterMenuShow ? styles.filterShow : ""}
           `}
           ref={this.filter_menu_ref}
           // onMouseOver={this.onFilterMouseOver}
@@ -638,14 +669,20 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           <div className={styles.title} onClick={this.toggleFilterMenu}>
             <span className={styles.symbol}></span>
             <span>Filters By</span>
-            <IconFont type="iconicon_flod_square" className={styles.titleIcon} />
+            <IconFont
+              type="iconicon_flod_square"
+              className={styles.titleIcon}
+            />
           </div>
 
           {/* countries */}
           <div className={styles.subMenuArea}>
             <div className={styles.menu}>
               <span className={styles.menuTitle}>Country Specification</span>
-              <IconFont type="iconicon_rightarrow" className={styles.arrowIcon} />
+              <IconFont
+                type="iconicon_rightarrow"
+                className={styles.arrowIcon}
+              />
             </div>
 
             <ul className={styles.menuList}>
@@ -663,10 +700,16 @@ class FilterBar extends React.PureComponent<IProps, IState> {
             <ul className={styles.menuListChosen}>
               {this.checked_countries.map((v: ICountry) => (
                 <li key={v.specification_location.key}>
-                  <span className={styles.tag} key={v.specification_location.key}>
+                  <span
+                    className={styles.tag}
+                    key={v.specification_location.key}
+                  >
                     {v.specification_location.display_value}
-                  </span>{' '}
-                  <IconFont type="iconicon_cancel" onClick={this.onCountryChange(v)} />
+                  </span>{" "}
+                  <IconFont
+                    type="iconicon_cancel"
+                    onClick={this.onCountryChange(v)}
+                  />
                 </li>
               ))}
             </ul>
@@ -676,7 +719,10 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           <div className={styles.subMenuArea}>
             <div className={styles.menu}>
               <span className={styles.menuTitle}>Make</span>
-              <IconFont type="iconicon_rightarrow" className={styles.arrowIcon} />
+              <IconFont
+                type="iconicon_rightarrow"
+                className={styles.arrowIcon}
+              />
             </div>
 
             <ul className={`${styles.menuList} ${styles.menuListMakes}`}>
@@ -686,7 +732,10 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                     <span className={styles.alpha}>{v.name}</span>
                     {v.results.map((it: IMakeItem) => (
                       <div className={styles.makeItem} key={it.make.key}>
-                        <img className={styles.makeItemLogo} src={it.make_logo} />
+                        <img
+                          className={styles.makeItemLogo}
+                          src={it.make_logo}
+                        />
                         <HackCheckBox
                           text={it.make.display_value}
                           checked={it.checked}
@@ -705,7 +754,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 <li key={v.make.key}>
                   <span className={styles.tag} key={v.make.key}>
                     {v.make.display_value}
-                  </span>{' '}
+                  </span>{" "}
                   <IconFont
                     type="iconicon_cancel"
                     // onClick={this.deleteCheckedMake(v)}
@@ -725,8 +774,8 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 max={_priceRange[1]}
                 left={priceRange[0]}
                 right={priceRange[1]}
-                onChange={this.onRangeChange('priceRange', false)}
-                onAfterChange={this.onRangeChange('priceRange')}
+                onChange={this.onRangeChange("priceRange", false)}
+                onAfterChange={this.onRangeChange("priceRange")}
               />
             </div>
           </div>
@@ -740,8 +789,8 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 max={_yearRange[1]}
                 left={yearRange[0]}
                 right={yearRange[1]}
-                onChange={this.onRangeChange('yearRange', false)}
-                onAfterChange={this.onRangeChange('yearRange')}
+                onChange={this.onRangeChange("yearRange", false)}
+                onAfterChange={this.onRangeChange("yearRange")}
               />
             </div>
           </div>
@@ -755,8 +804,8 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 max={_mileageRange[1]}
                 left={mileageRange[0]}
                 right={mileageRange[1]}
-                onChange={this.onRangeChange('mileageRange', false)}
-                onAfterChange={this.onRangeChange('mileageRange')}
+                onChange={this.onRangeChange("mileageRange", false)}
+                onAfterChange={this.onRangeChange("mileageRange")}
               />
             </div>
           </div>
@@ -776,7 +825,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                   <HackCheckBox
                     text={v.key}
                     checked={v.checked}
-                    onChange={this.onColorChange('exterior_colors', v)}
+                    onChange={this.onColorChange("exterior_colors", v)}
                   />
                 </li>
               ))}
@@ -791,7 +840,10 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                   ></li>
                 ))}
               </ul>
-              <IconFont type="iconicon_rightarrow" className={styles.arrowIcon} />
+              <IconFont
+                type="iconicon_rightarrow"
+                className={styles.arrowIcon}
+              />
             </div>
           </div>
 
@@ -810,7 +862,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                   <HackCheckBox
                     text={v.key}
                     checked={v.checked}
-                    onChange={this.onColorChange('interior_colors', v)}
+                    onChange={this.onColorChange("interior_colors", v)}
                   />
                 </li>
               ))}
@@ -825,7 +877,10 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                   ></li>
                 ))}
               </ul>
-              <IconFont type="iconicon_rightarrow" className={styles.arrowIcon} />
+              <IconFont
+                type="iconicon_rightarrow"
+                className={styles.arrowIcon}
+              />
             </div>
           </div>
 
@@ -836,7 +891,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
               <RadioBtn
                 all={transmission_group}
                 value={transmission}
-                onChange={this.onRadioChange('transmission')}
+                onChange={this.onRadioChange("transmission")}
               />
             </div>
           </div>
@@ -848,7 +903,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
               <RadioBtn
                 all={vehicle_status_group}
                 value={vehicle_status}
-                onChange={this.onRadioChange('vehicle_status')}
+                onChange={this.onRadioChange("vehicle_status")}
               />
             </div>
           </div>
@@ -862,8 +917,8 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 max={_readyToShipRange[1]}
                 left={readyToShipRange[0]}
                 right={readyToShipRange[1]}
-                onChange={this.onRangeChange('readyToShipRange', false)}
-                onAfterChange={this.onRangeChange('readyToShipRange')}
+                onChange={this.onRangeChange("readyToShipRange", false)}
+                onAfterChange={this.onRangeChange("readyToShipRange")}
               />
             </div>
           </div>
@@ -875,7 +930,7 @@ class FilterBar extends React.PureComponent<IProps, IState> {
               <RadioBtn
                 all={steering_position_group}
                 value={steering_position}
-                onChange={this.onRadioChange('steering_position')}
+                onChange={this.onRadioChange("steering_position")}
               />
             </div>
           </div>
@@ -885,55 +940,57 @@ class FilterBar extends React.PureComponent<IProps, IState> {
 
     const sortMenu = (
       <div
-        className={`${styles.sortMenu} ${sortMenuShow ? styles.show : ''}`}
+        className={`${styles.sortMenu} ${sortMenuShow ? styles.show : ""}`}
         onMouseOver={this.onSortMouseOver}
         onMouseLeave={this.onSortMouseLeave}
         onClick={this.onSortMenuClick}
       >
         <div
-          data-sort={'recommendation'}
+          data-sort={"recommendation"}
           className={`${styles.item} ${
-            ordering === 'recommendation' ? styles.sortMenuItemActive : ''
+            ordering === "recommendation" ? styles.sortMenuItemActive : ""
           }`}
         >
           Recommendation
         </div>
         <div
-          data-sort={'price_in_usd'}
+          data-sort={"price_in_usd"}
           className={`${styles.item} ${
-            ordering === 'price_in_usd' ? styles.sortMenuItemActive : ''
+            ordering === "price_in_usd" ? styles.sortMenuItemActive : ""
           }`}
         >
           Price Low to High
         </div>
         <div
-          data-sort={'-price_in_usd'}
+          data-sort={"-price_in_usd"}
           className={`${styles.item} ${
-            ordering === '-price_in_usd' ? styles.sortMenuItemActive : ''
+            ordering === "-price_in_usd" ? styles.sortMenuItemActive : ""
           }`}
         >
           Price High to Low
         </div>
         <div
-          data-sort={'-publish_time'}
+          data-sort={"-publish_time"}
           className={`${styles.item} ${
-            ordering === '-publish_time' ? styles.sortMenuItemActive : ''
+            ordering === "-publish_time" ? styles.sortMenuItemActive : ""
           }`}
         >
           Publish Time Recent to Old
         </div>
         <div
-          data-sort={'publish_time'}
+          data-sort={"publish_time"}
           className={`${styles.item} ${
-            ordering === 'publish_time' ? styles.sortMenuItemActive : ''
+            ordering === "publish_time" ? styles.sortMenuItemActive : ""
           }`}
         >
           Publish Time Old to Recent
         </div>
         <div
-          data-sort={'distance_to_warehouse'}
+          data-sort={"distance_to_warehouse"}
           className={`${styles.item} ${
-            ordering === 'distance_to_warehouse' ? styles.sortMenuItemActive : ''
+            ordering === "distance_to_warehouse"
+              ? styles.sortMenuItemActive
+              : ""
           }`}
         >
           Mileage Low to High
@@ -951,9 +1008,15 @@ class FilterBar extends React.PureComponent<IProps, IState> {
               // onMouseLeave={this.onFilterMouseLeave}
               onClick={this.toggleFilterMenu}
             >
-              <IconFont type="iconicon_filter_vertical" className={styles.bigFilterIcon} />
+              <IconFont
+                type="iconicon_filter_vertical"
+                className={styles.bigFilterIcon}
+              />
               <span className={styles.filterTitle}>Filters</span>
-              <IconFont type="iconicon_dropdown_square" className={styles.statusIcon} />
+              <IconFont
+                type="iconicon_dropdown_square"
+                className={styles.statusIcon}
+              />
             </div>
 
             <div className={styles.right}>
@@ -962,11 +1025,16 @@ class FilterBar extends React.PureComponent<IProps, IState> {
                 onMouseOver={this.onSortMouseOver}
                 onMouseLeave={this.onSortMouseLeave}
               >
-                <IconFont type="iconicon_triangle_updown" className={styles.rightIcon} />
-                <span className={styles.rightSpan}>{Reflect.get(orderingType, ordering)}</span>
+                <IconFont
+                  type="iconicon_triangle_updown"
+                  className={styles.rightIcon}
+                />
+                <span className={styles.rightSpan}>
+                  {Reflect.get(orderingType, ordering)}
+                </span>
               </div>
               <span className={styles.total}>
-                {total} {total > 1 ? 'vehicles' : 'vehicle'} found
+                {total} {total > 1 ? "vehicles" : "vehicle"} found
               </span>
             </div>
           </div>
@@ -979,7 +1047,12 @@ class FilterBar extends React.PureComponent<IProps, IState> {
           <div className={styles.conditions}>
             {conditions.map(
               (v: IConditionItem, i: number): ReactNode => (
-                <ConditionItem key={i} type={v.type} desc={v.desc} onClose={v.onClose} />
+                <ConditionItem
+                  key={i}
+                  type={v.type}
+                  desc={v.desc}
+                  onClose={v.onClose}
+                />
               )
             )}
           </div>

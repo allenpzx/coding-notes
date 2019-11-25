@@ -5,10 +5,10 @@
  * @author zixiu
  */
 
-import React, { SFC, memo } from 'react';
-import { Slider } from 'antd';
-import formatNumber from '../../common/thousands';
-import styles from './index.module.scss';
+import React, { SFC, memo } from "react";
+import { Slider } from "antd";
+import formatNumber from "../../common/thousands";
+import styles from "./index.module.scss";
 
 interface ISliderInput {
   min: number;
@@ -19,7 +19,14 @@ interface ISliderInput {
   onAfterChange?: any;
 }
 
-const SliderInput: SFC<ISliderInput> = ({ min, max, left, right, onChange, onAfterChange }) => (
+const SliderInput: SFC<ISliderInput> = ({
+  min,
+  max,
+  left,
+  right,
+  onChange,
+  onAfterChange
+}) => (
   <div className={styles.container}>
     <div className={styles.range}>
       <span>{formatNumber(left)}</span>

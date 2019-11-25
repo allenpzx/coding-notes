@@ -7,10 +7,10 @@
  * @version 1.0
  */
 
-import React from 'react';
-import Header from '../Header';
-import Footer from '../Footer';
-import styles from './BasicLayout.module.scss';
+import React from "react";
+import Header from "../Header";
+import Footer from "../Footer";
+import styles from "./BasicLayout.module.scss";
 
 interface Props {
   style?: object;

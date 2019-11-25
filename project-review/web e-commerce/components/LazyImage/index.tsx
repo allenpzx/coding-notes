@@ -5,7 +5,8 @@
  * @author zixiu
  */
 
-import React, { SFC, useEffect, useRef, memo } from 'react';
+import React, { SFC, useEffect, useRef, memo, useState } from "react";
+import { Spin, Icon } from "antd";
 
 interface IOptions {
   root: HTMLElement;
@@ -33,7 +34,7 @@ const LazyImage: SFC<IProps> = ({ src, alt, width, height, opt }) => {
         observer.unobserve((imgRef as any).current);
       }
     },
-    { rootMargin: '100px 0px', ...opt }
+    { rootMargin: "100px 0px", ...opt }
   );
 
   useEffect(() => {
@@ -43,14 +44,39 @@ const LazyImage: SFC<IProps> = ({ src, alt, width, height, opt }) => {
     };
   });
 
+  const [show, setShow] = useState(false);
+
+  const antIcon = (
+    <Icon type="loading" style={{ fontSize: 30, zIndex: 1000 }} spin />
+  );
+
   return (
-    <img
-      ref={imgRef}
-      src={''}
-      data-src={src}
-      alt={alt}
-      style={{ width, height, objectFit: 'cover' }}
-    />
+    <div style={{ width, height }}>
+      {!show && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width,
+            height,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Spin indicator={antIcon} />
+        </div>
+      )}
+      <img
+        ref={imgRef}
+        src={""}
+        data-src={src}
+        alt={alt}
+        style={{ width, height, objectFit: "cover" }}
+        onLoad={() => setShow(true)}
+      />
+    </div>
   );
 };
 

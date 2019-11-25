@@ -12,23 +12,68 @@ import Loading from '../../components/Card/loading';
 import FilterBar from '../../components/FilterBar';
 import { connect } from 'react-redux';
 import { AppStore } from '../../store/reducers/index';
-import { SettingInfoStore } from '../../store/types';
+import { SettingInfoStore, UserActions } from '../../store/types';
 import { SetUserInfo } from '../../store/actions/user';
 import { SetSettingInfo } from '../../store/actions/setting';
 import Empty from '../../components/Empty/Empty';
 import { getCookie } from '../../common/cookie';
 import { path } from '../../routes/routers';
+import { bindActionCreators, compose, Dispatch } from 'redux';
 import styles from '../../components/Card/index.module.scss';
-import { bindActionCreators } from 'redux';
 
-interface OutProps extends Props {}
-interface Props {
+interface IStateProps {
   setting: SettingInfoStore;
   company_country: string;
-  setUser: any;
 }
 
-interface State {
+interface IDispatchProps {
+  setUser: (arg: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    username: string;
+    company_country: string;
+    headshot: string;
+    display_name: string;
+  }) => UserActions;
+}
+
+const mapState = (state: AppStore): IStateProps => ({
+  setting: state.setting,
+  company_country: state.user.userInfo.company_country
+});
+
+const mapDispatch = (dispatch: Dispatch): IDispatchProps =>
+  bindActionCreators(
+    {
+      setUser: ({
+        id = '',
+        first_name = '',
+        last_name = '',
+        phone = '',
+        username = '',
+        company_country = '',
+        headshot = '',
+        display_name = ''
+      }) =>
+        SetUserInfo({
+          userId: id,
+          first_name,
+          last_name,
+          phone,
+          username,
+          company_country,
+          headshot,
+          display_name
+        })
+    },
+    dispatch
+  );
+
+type IProps = IStateProps & IDispatchProps & RouteComponentProps;
+
+interface IState {
   page: number;
   pageSize: number;
   loading: boolean;
@@ -39,41 +84,8 @@ interface State {
   server_time: string;
 }
 
-@(withRouter as any)
-@(connect(
-  (state: AppStore) => ({
-    setting: state.setting,
-    company_country: state.user.userInfo.company_country
-  }),
-  dispatch =>
-    bindActionCreators(
-      {
-        setUser: ({
-          id = '',
-          first_name = '',
-          last_name = '',
-          phone = '',
-          username = '',
-          company_country = '',
-          headshot = '',
-          display_name = ''
-        }) =>
-          SetUserInfo({
-            userId: id,
-            first_name,
-            last_name,
-            phone,
-            username,
-            company_country,
-            headshot,
-            display_name
-          })
-      },
-      dispatch
-    )
-) as any)
-class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> {
-  static defaultProps: OutProps;
+class BuyMarket extends React.Component<IProps, IState> {
+  static defaultProps: IProps;
 
   state = {
     page: 1,
@@ -142,6 +154,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
         this.goto('/login');
       }
 
+      // const { setting, company_country } = this.props;
       const { page, pageSize, loading } = this.state;
       if (loading) return;
       this.setState({ loading: true });
@@ -180,7 +193,7 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
 
   onCardBottomClick = (arg: any) => (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    // console.log(arg, '留着给聊天需求用的');
+    console.log(arg, '留着给聊天需求用的');
   };
 
   componentWillUnmount() {
@@ -254,4 +267,10 @@ class BuyMarket extends React.Component<Props & RouteComponentProps<{}>, State> 
   }
 }
 
-export default BuyMarket;
+export default compose(
+  withRouter,
+  connect(
+    mapState,
+    mapDispatch
+  )
+)(BuyMarket);

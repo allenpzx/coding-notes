@@ -1,0 +1,82 @@
+@import '../../../assets/style/common';
+@import '../../../assets/style/config.scss';
+
+.chatMain {
+  @include flexCenter;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  @include zIndexChatAllInOne;
+  background-color: rgba(0, 0, 0, 0.5);
+  .container {
+    @include flex;
+    width: 1200px;
+    height: 800px;
+    background-color: $white;
+    z-index: 13;
+    > div,
+    > aside {
+      height: 100%;
+    }
+    .mid {
+      width: 320px;
+      position: relative;
+    }
+    .right {
+      flex: 1;
+    }
+    .left {
+      @include flexAlignCenter;
+      @include fontSFPro;
+      flex-direction: column;
+      width: 90px;
+      color: $white;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      background-color: $black;
+      position: relative;
+      .exitfullscreen {
+        font-size: 20px;
+        position: absolute;
+        left: 8px;
+        top: 8px;
+      }
+      .name {
+        margin-top: 8px;
+        margin-bottom: 49px;
+      }
+      .role {
+        @include cursor;
+        text-align: center;
+        margin-bottom: 23px;
+        position: relative;
+        &.active {
+          color: $blue;
+        }
+        .roleIcon {
+          font-size: 24px;
+        }
+        span {
+          display: block;
+          margin-top: -3px;
+        }
+        .numTagWrapper {
+          @include fontSFPro;
+          position: absolute;
+          top: -8px;
+          left: 20px;
+          height: 12px;
+        }
+        .numTag {
+          font-size: 12px;
+          line-height: 1;
+          padding: 0 4px;
+          border-radius: 6px;
+        }
+      }
+    }
+  }
+}

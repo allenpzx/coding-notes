@@ -1,0 +1,41 @@
+@import '../../../assets/style/config.scss';
+
+.chatListLoading {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+
+  .loadingCon {
+    //width: 132px;
+    //height: 98px;
+    border-radius: 4px;
+    //box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.18);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    //margin: 118px auto auto 94px;
+    @include flexCenter;
+  }
+
+  .loadImg {
+    width: 48px;
+    transform: rotate(45deg);
+    animation: antRotate 2s infinite linear;
+  }
+}
+
+.chatListBox {
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes antRotate {
+  to {
+    -webkit-transform: rotate(405deg);
+    transform: rotate(405deg);
+  }
+}
