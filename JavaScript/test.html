@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .container {
+        width: 200px;
+        height: 200px;
+        border: 1px solid red;
+        padding-top: 20px;
+      }
+
+      .line {
+        width: 100%;
+        position: relative;
+        /* border-bottom: 1px solid black; */
+      }
+
+      .line::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        height: 1px;
+        width: 100%;
+        background-color: #000;
+        /* transform-origin: 50% 0%; */
+      }
+
+      @media only screen and (-webkit-min-device-pixel-ratio: 2) {
+        .line {
+          transform: scaleY(0.5);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <div class="container" onmousemove="_log()">
+      <div class="line"></div>
+    </div>
+
+    <div class="container" onmousemove="_log2()">
+      <div class="line"></div>
+    </div> -->
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"
+      integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      // const arr = [
+      //   0,
+      //   [1],
+      //   [
+      //     [1, 2],
+      //     [3, 4]
+      //   ]
+      // ];
+
+      // const _flat = arr =>
+      //   arr.reduce(
+      //     (prev, curr) => prev.concat(Array.isArray(curr) ? _flat(curr) : curr),
+      //     []
+      //   );
+      // console.log(_flat(arr));
+
+      // let arr2 = [1, 2, 1, 3, 3, 0, 1];
+      // function filter(arr) {
+      //   let s = new Set(arr);
+      //   return [...s].sort((a, b) => a - b);
+      // }
+
+      // console.log("filter: ", filter(arr2));
+
+      // function _create(proto, propertiesObject) {
+      //   let obj = {};
+      //   obj.__proto__ = proto;
+      //   propertiesObject && Object.defineProperties(obj, propertiesObject);
+      //   return obj;
+      // }
+
+      // let obj = {
+      //   name: "test",
+      //   age: 100
+      // };
+
+      // obj.__proto__.getAge = function() {
+      //   return this.age;
+      // };
+
+      // function A(name, age) {
+      //   this.name = name;
+      //   this.age = age;
+      // }
+
+      // A.prototype.getName = function() {
+      //   return this.name;
+      // };
+
+      // function factory(fn, ...args) {
+      //   let obj = {};
+      //   obj.__proto__ = fn.prototype;
+      //   fn.apply(obj, args);
+      //   return obj;
+      // }
+
+      // Function.prototype._apply = function(context, args) {
+      //   const ctx = context || window;
+      //   ctx.fn = this;
+      //   const res = ctx.fn(...args);
+      //   delete ctx.fn;
+      //   return res;
+      // };
+
+      // Function.prototype._call = function(context, ...args) {
+      //   const ctx = context || window;
+      //   ctx.fn = this;
+      //   const res = ctx.fn(...args);
+      //   delete ctx.fn;
+      //   return res;
+      // };
+
+      // function log() {
+      //   console.log("log");
+      // }
+
+      // function _debounce(fn, delay) {
+      //   let timer = null;
+      //   return (...args) => {
+      //     clearTimeout(timer);
+      //     timer = setTimeout(() => {
+      //       console.log(this);
+      //       fn.apply(this, args);
+      //     }, delay);
+      //   };
+      // }
+
+      // function _throttle(fn, limit) {
+      //   let timer = null;
+      //   return (...args) => {
+      //     if (timer) return;
+      //     fn();
+      //     timer = setTimeout(() => {
+      //       fn();
+      //       clearTimeout(timer);
+      //     }, limit);
+      //   };
+      // }
+
+      // // const _log = _debounce(log, 500);
+      // const _log = _throttle(log, 1000);
+
+      // const _log2 = _.throttle(log, 1000);
+
+      // function _instanceof(obj, fn) {
+      //   if (obj === null || obj === undefined) {
+      //     return false;
+      //   }
+      //   return obj.__proto__ === fn.prototype || _instanceof(obj.__proto__, fn);
+      // }
+
+      // Function.prototype._bind = function(context, ...args) {
+      //   let _fn = this;
+      //   return function() {
+      //     const ctx = context || window;
+      //     ctx.fn = _fn;
+      //     const result = ctx.fn(...args);
+      //     delete ctx.fn;
+      //     return result;
+      //   };
+      // };
+
+      // const aa = factory(A, "zixiu", 18);
+      // console.log(aa, aa.getName());
+      // const bb = new A("zixiu", 18);
+      // console.log(bb, bb.getName());
+
+      // A._apply(obj, ["覆盖", 100]);
+      // A._call(obj, "覆盖1", 120);
+
+      // Function.prototype._bind = function(content, ...args) {
+      //   let fn = this;
+      //   return function() {
+      //     const ctx = content || window;
+      //     ctx.fn = fn;
+      //     const result = ctx.fn(...args);
+      //     delete ctx.fn;
+      //     return result;
+      //   };
+      // };
+
+      // const _test = A._bind(obj, "nice", 10000000);
+      // const obj2 = _test();
+      // console.log(obj, obj.getAge(), obj2);
+
+      // function deepClone(target) {
+      //   let result = target;
+      //   if (Array.isArray(target)) {
+      //     result = [];
+      //     for (let key in target) {
+      //       if (!target.hasOwnProperty(key)) continue;
+      //       let value = target[key];
+      //       if (
+      //         Array.isArray(value) ||
+      //         (typeof target === "object" &&
+      //           target &&
+      //           target.constructor === Object)
+      //       ) {
+      //         value = deepClone(value);
+      //       }
+      //       result[key] = value;
+      //     }
+      //   }
+
+      //   if (target instanceof Object && target.constructor === Object) {
+      //     result = {};
+      //     for (let key in target) {
+      //       if (!target.hasOwnProperty(key)) continue;
+      //       let value = target[key];
+      //       if (
+      //         Array.isArray(value) ||
+      //         (typeof target === "object" &&
+      //           target &&
+      //           target.constructor === Object)
+      //       ) {
+      //         value = deepClone(value);
+      //       }
+      //       result[key] = value;
+      //     }
+      //   }
+
+      //   return result;
+      // }
+
+      // const _a = 100;
+      // let _aa = deepClone(_a)
+      // console.log(_a, _aa);
+      // _aa = 0;
+      // console.log(_a, _aa)
+
+      // for(let a in [1,2,3]) {
+      //   console.log('====', a)
+      // }
+
+      // const b = test;
+      // const b = JSON.parse(JSON.stringify(test))
+      // const b = deepClone(test);
+      // b.a = 2;
+      // b.b = "3";
+      // // (b.c = [2, 3]);
+      // b.c[0] = 100;
+
+      // b.d = {
+      //   name: "b"
+      // };
+      // b.e.names[0] = {
+      //   names: [111111]
+      // };
+
+      // console.log(b, test);
+
+      // var a = {};
+      // a.a = a;
+      // deepClone(a);
+
+      var obj = [{ a: 1 }, { b: 2 }, { d: [1, 2, { g: ["abc"] }] }];
+
+      const test = {
+        a: 1,
+        b: "2",
+        c: [1, 2],
+        d: {
+          name: "d"
+        },
+        e: {
+          names: ["abc", "cde"]
+        },
+        f: () => console.log("f")
+      };
+
+      // function cloneDeep(target, store = new Map()) {
+      //   if (store.has(target)) {
+      //     return store.get(target);
+      //   }
+      //   let result = target;
+
+      //   const needRecursive = tar =>
+      //     Array.isArray(tar) ||
+      //     (tar instanceof Object && tar.constructor === Object);
+
+      //   if (needRecursive(target)) {
+      //     store.set(target, result);
+      //     result = Array.isArray(target) ? [] : {};
+      //     for (let key in target) {
+      //       if (target.hasOwnProperty(key)) {
+      //         const value = target[key];
+      //         result[key] = needRecursive(value)
+      //           ? cloneDeep(value, store)
+      //           : value;
+      //       }
+      //     }
+      //   }
+      //   return result;
+      // }
+
+      function cloneDeep(target, store = new Map()) {
+        if (store.get(target)) return target;
+        let result;
+        const needRecursive = tar =>
+          Array.isArray(tar) ||
+          (tar instanceof Object && tar.constructor === Object);
+        if (needRecursive(target)) {
+          store.set(target, target);
+          result = Array.isArray(target) ? [] : {};
+          for (let i in target) {
+            if (target.hasOwnProperty(i)) {
+              const val = target[i];
+              result[i] = needRecursive(val) ? cloneDeep(val, store) : val;
+            }
+          }
+        }
+        return result || target;
+      }
+
+      // obj[3] = obj;
+      let obj2 = cloneDeep(obj);
+      obj2[2].d[0] = 100000000;
+      console.log(obj, obj2);
+
+      function queryChilds(target) {
+        let results = [];
+
+        const needRecursive = tar =>
+          Array.isArray(tar) ||
+          (tar instanceof Object && tar.constructor === Object);
+
+        if (needRecursive(target)) {
+          for (let key in target) {
+            if (target.hasOwnProperty(key)) {
+              const value = target[key];
+              results = results.concat(
+                needRecursive(value) ? queryChilds(value) : value
+              );
+            }
+          }
+        } else {
+          results = results.concat(target);
+        }
+
+        return results;
+      }
+
+      const res = queryChilds(obj);
+
+      // console.log("childs: ", res);
+
+      function Person(name, age) {
+        (this.name = name), (this.age = age);
+        return 123;
+      }
+
+      Person.prototype.getName = function() {
+        return this.name;
+      };
+
+      function factory(fn, ...args) {
+        let o = {};
+        o.__proto__ = fn.prototype;
+        const res = fn.apply(o, args);
+        return o;
+      }
+
+      function _instanceof(obj, fn) {
+        if (obj === null || obj === undefined) return false;
+        return obj.__proto__ === fn.prototype || _instanceof(obj.__proto__, fn);
+      }
+
+      function _create(proto, properties) {
+        let o = {};
+        o.__proto__ = proto;
+        properties && Object.defineProperties(o, properties);
+        return o;
+      }
+
+      const p1 = factory(Person, "name1", 1);
+
+      Function.prototype._apply = function(context, ...args) {
+        const ctx = context || window;
+        ctx.fn = this;
+        const res = ctx.fn(...args);
+        delete ctx.fn;
+        return res;
+      };
+
+      Function.prototype._bind = function(context, ...args) {
+        const fn = this;
+        return function(...argus) {
+          const ctx = context || window;
+          ctx.fn = fn;
+          const res = ctx.fn(...args, ...argus);
+          delete ctx.fn;
+          return res;
+        };
+      };
+
+      const obje = {
+        name: null,
+        age: null
+      };
+
+      console.log(
+        "p1: ",
+        p1,
+        p1.getName(),
+        p1 instanceof Person,
+        _instanceof(p1, Person)
+      );
+
+      console.log(_instanceof("", String));
+
+      const numbers = [5, 6, 2, 3, 7];
+      let max = Math.max.apply(null, numbers);
+
+      Person._apply(obje, "test", 26);
+      console.log(obje, max);
+
+      const module = {
+        x: 42,
+        getX: function(arg) {
+          arg && console.log("hhhh");
+          return this.x;
+        }
+      };
+
+      const GetX = module.getX;
+      console.log(GetX());
+      const boundGetX = GetX._bind(module);
+      console.log(boundGetX(), boundGetX(123));
+
+      function addArguments(arg1, arg2) {
+        return arg1 + arg2;
+      }
+
+      const addThirtySeven = addArguments._bind(null, 10);
+      console.log(addThirtySeven(10));
+
+      function Parent(name) {
+        this.name = name;
+      }
+
+      Parent.prototype.sayHi = function() {
+        console.log("parent hi");
+      };
+
+      Parent.prototype.doSome = function() {
+        console.log("parent do some thing!");
+      };
+
+      function Child(name, parentName) {
+        Parent.call(parentName);
+        this.name = name;
+      }
+      // Child.prototype = Parent.prototype
+      Child.prototype = Object.create(Parent.prototype);
+      Child.prototype.constructor = Child;
+
+      Child.prototype.sayHi = function() {
+        console.log("child hi");
+      };
+
+      const child = new Child("child", "parent name");
+
+      const parent = new Parent("parent");
+
+      parent.sayHi();
+
+      child.sayHi();
+
+      child.doSome();
+
+      console.log(Child.prototype, Parent.prototype);
+
+      let arr1 = [1, 2, 3, 4, 3, 2, 1];
+      let arr2 = [3, 4, 4, 5, 6, 3, 3];
+
+      function getCommon(arr1, arr2) {
+        // const lBigThanr = new Set(arr1).size > new Set(arr2).size;
+        // let _arr1 = [...new Set(lBigThanr ? arr1 : arr2)];
+        // let _arr2 = [...new Set(lBigThanr ? arr2 : arr1)];
+
+        let _arr1 = [...new Set(arr1)].sort((a, b) => a-b);
+        let _arr2 = [...new Set(arr2)].sort((a, b) => a-b);
+
+        const res = [];
+        let index = 0;
+        for(let i = 0; i < _arr1.length; i++) {
+
+          let match = false
+          for(let n = 0; n < _arr2.length; n++) {
+            if(_arr2[n] === _arr1[i]) {
+              index = n;
+              match = true
+              break;
+            }
+          }
+
+          match && res.push(_arr1[i])
+
+          // const match = _arr2.find(v => v === _arr1[i]);
+          // match && res.push(match)
+        }
+        return res;
+      }
+
+      console.time('used time')
+      const ress = getCommon(arr1, arr2);
+      console.log('res: ', ress);
+      console.timeEnd('used time');
+
+      class A {
+        constructor(value) {
+          this.value = value;
+        }
+        valueOf() {
+          console.log('[valueOf]')
+          return this.value++
+        }
+      }
+
+      const a = new A(1);
+      if (a == 1 && a == 2 && a == 3) {
+          console.log("Hi Eno!");
+      }
+      console.log(a, a + 1)
+      // function debounce()
+
+      // obj[2]['d'][2]['g'] = obj;
+      // let obj2 = cloneDeep(obj);
+
+      // obj2[0].a = 2;
+      // obj2[1] = false;
+      // obj2[2]["d"][0] = 100;
+
+      // console.log(
+      //   _.cloneDeep(obj),
+      //   obj2,
+      //   obj,
+      //   cloneDeep(null),
+      //   cloneDeep(undefined)
+      // );
+
+      // let a = 1
+      // Object.defineProperty(a, {
+      //   get(key) {
+      //     cosole.log(key)
+      //   }
+      // })
+
+      // var obj = new Proxy(
+      //   {},
+      //   {
+      //     get: function(target, propKey, receiver) {
+      //       console.log(`getting ${propKey}!`);
+      //       return Reflect.get(target, propKey, receiver);
+      //     },
+      //     set: function(target, propKey, value, receiver) {
+      //       console.log(`setting ${propKey}!`);
+      //       return Reflect.set(target, propKey, value, receiver);
+      //     }
+      //   }
+      // );
+
+      // var a = obj.a
+
+      // fn(1) === 1
+      // fn(1)(2) === 2
+      // fn(1)(2)(3) === 3
+
+      // let res = () => a === 1 && a === 2 && a === 3;
+      // console.log(res());
+
+      // _test();
+      // console.log('obj: ', obj);
+      // console.log(obj);
+
+      // let a = new A('a', 1);
+
+      // console.log(_instanceof(obj, A), _instanceof(a, A), _instanceof(null, {}))
+
+      // var a = _create(null);
+      // console.log("a: ", a);
+      // console.log(Object.create(null))
+    </script>
+  </body>
+</html>
