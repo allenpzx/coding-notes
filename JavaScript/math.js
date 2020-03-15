@@ -25,3 +25,40 @@ function getRandom4(left, right) {
     return Math.ceil((Math.random() * (right - left)) + left)
 }
 
+// 取整
+function trunc(num) {
+    return num > 0 ? Math.floor(num) : Math.ceil(num)
+}
+
+// function trunc(num) {
+//     return num - num % 1;
+// }
+
+// 取小数
+function fract(num) {
+    return num - trunc(num);
+}
+
+console.log(3.75 % 1); // 0.75
+console.log(-3.75 % 1); // -0.75
+console.log(3.22 % 1)
+console.log((3.22 % 1).toFixed(2))
+
+console.log(trunc(3.75))
+console.log(trunc(-3.75))
+console.log(fract(3.75))
+console.log(fract(-3.75))
+
+let a = Infinity;
+
+console.log(a === a - 1); // true
+
+let b = -Infinity;
+
+console.log(b === b - 1);  // true
+
+console.log(Infinity + Infinity); // Infinity
+console.log(Infinity - Infinity); // NaN
+console.log(Infinity * Infinity); // Infinity
+console.log(Infinity / Infinity); // NaN
+console.log(Infinity * 0); // NaN
