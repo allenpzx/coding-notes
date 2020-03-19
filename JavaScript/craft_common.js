@@ -2,10 +2,9 @@
 
 // instanceof
 function _instanceof(left, right) {
-  if (left.__proto__ === null || left.__proto__ === undefined) return false;
-  return left.__proto__ === right.prototype
-    ? true
-    : _instanceof(left.__proto__, right);
+  if(!left) return false
+  if(left.__proto__ === right.prototype) return true
+  return _instanceof(left.__proto__, right)
 }
 
 // new

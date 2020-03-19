@@ -65,7 +65,6 @@
 // console.log(humanReadable(86399));
 // console.log(humanReadable(359999));
 
-
 // function duplicateCount(text){
 //     //...
 //     let count = 0;
@@ -145,3 +144,53 @@
 // console.log(tickets([25,25,50,100,25,25,25,100,25,50,25,100,25,50,25,100]))
 // console.log(tickets([ 25, 25, 25, 25, 25, 100, 100 ]))
 // console.log(tickets([ 25, 25, 25, 25, 50, 100, 50 ]))
+
+// let obj = [
+//   { a: 1 },
+//   { b: [1, 2] },
+//   {c: {
+//     d: 1
+//   }}
+// ];
+
+// let obj2 = copyDeep(obj);
+// obj2[0].a = 2;
+// obj2[1].b = '123'
+// obj2[2].c.d = obj
+
+// function copyDeep (target, store = new Map()) {
+//     const needLoop = (tar) => Array.isArray(tar) || (tar && tar.constructor === Object)
+//     if(needLoop(target)) {
+//         let result = Array.isArray(target) ? [] : {};
+//         for(let i in target) {
+//             if(target.hasOwnProperty(i)) {
+//                 const value = target[i];
+//                 result[i] = needLoop(value) ? copyDeep(value) : value
+//             }
+//         }
+//         return result;
+//     }
+//     return target
+// }
+// console.log(obj2, obj);
+
+// let obj = [
+//   {
+//     name: "hh",
+//     score: 100,
+//     detail: {
+//       age: 18,
+//       gender: "femail"
+//     }
+//   },
+//   {
+//     name: "xx",
+//     score: 99,
+//     detail: {
+//       age: 17,
+//       gender: "mail"
+//     }
+//   }
+// ];
+
+// console.log(JSON.stringify(obj, ['name'], 4))

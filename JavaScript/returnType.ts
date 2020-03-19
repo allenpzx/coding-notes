@@ -7,7 +7,7 @@
  */
 
 
-function test(name: string):void {
+function test1(name: string):void {
     this.name = name
 }
 
