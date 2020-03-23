@@ -846,87 +846,231 @@
 // let test = new Test();
 // console.log(test, Object.keys(test), test.age)
 
-class Test {
-    constructor (name, age) {
-        var a = 'a'
-        this.name = name;
-        this.age = age
-        this.type = 'constructor'
+// class Test {
+//     constructor (name, age) {
+//         var a = 'a'
+//         this.name = name;
+//         this.age = age
+//         this.type = 'constructor'
+//     }
+
+//     b = 'b';
+
+//     static stacticC = 123;
+
+//     getName = function () {
+//         console.log(this.name)
+//     }
+
+//     getAge () {
+//         console.log(this.age)
+//     }
+
+//     type = '123'
+
+//     getType = () => {
+//       console.log('getType prototype', this.type);
+//       console.log('type', type)
+//     }
+// }
+
+// var type = 'window';
+
+// Test.description = 'This is Test description!';
+
+// let test = new Test('testName', 17);
+
+// console.log(test)
+// console.log(Object.keys(test))
+// console.log(Object.getOwnPropertyNames(test))
+// console.log(Object.getPrototypeOf(test))
+// for(let i in test) {
+//     console.log('loop: ', i, test.hasOwnProperty(i));
+// }
+// console.log(test.description, '|' ,Test.description)
+// console.log(test.stacticC, '|' ,Test.stacticC)
+// console.log(test.a)
+// test.getName();
+// test.getAge();
+// console.log(test.getType())
+
+// console.log('                                               ')
+
+
+// function Person(name, age) {
+//     var pri = 'pri';
+//     this.name = name;
+//     this.age = age;
+//     this.getName = function () {
+//         console.log(this.name)
+//     }
+// }
+
+// Person.prototype.getAge = function () {
+//     console.log(this.age)
+// }
+
+// Person.description = 'This is Person description!'
+
+// let person = new Person('person', '17');
+
+// console.log(person)
+// console.log(Object.keys(person))
+// console.log(Object.getOwnPropertyNames(person))
+// console.log(Object.getPrototypeOf(person))
+// for(let i in person) {
+//     console.log('loop: ', i, person.hasOwnProperty(i));
+// }
+// console.log(person.description, '|' ,person.description)
+// console.log(person.pri)
+// person.getName();
+// person.getAge();
+
+
+function _instance(left, right) {
+        while(true){
+            if(!left) return false
+            if(left.__proto__ === right.prototype) return true
+            left = left.__proto__
+        }
     }
 
-    b = 'b';
+    // console.log({} instanceof Object, _instance({}, Object))
+    // console.log([] instanceof Array, _instance([], Array))
 
-    static stacticC = 123;
-
-    getName = function () {
-        console.log(this.name)
+    function create(proto, properties) {
+        let o = {};
+        o.__proto__ = proto;
+        properties && Object.defineProperties(o, properties);
+        return o
     }
 
-    getAge () {
-        console.log(this.age)
+    // console.log(Object.create({}), create({}))
+    // console.log(Object.create(null), create(null))
+
+    function factory(fn, ...args) {
+      let o = {};
+      o.__proto__ = fn.prototype;
+      let res = fn.apply(o, args)
+      return res instanceof Object ? res : o
     }
 
-    type = '123'
-
-    getType = () => {
-      console.log('getType prototype', this.type);
-      console.log('type', type)
+    function A(name) {
+      this.name = name;
     }
-}
-
-var type = 'window';
-
-Test.description = 'This is Test description!';
-
-let test = new Test('testName', 17);
-
-console.log(test)
-console.log(Object.keys(test))
-console.log(Object.getOwnPropertyNames(test))
-console.log(Object.getPrototypeOf(test))
-for(let i in test) {
-    console.log('loop: ', i, test.hasOwnProperty(i));
-}
-console.log(test.description, '|' ,Test.description)
-console.log(test.stacticC, '|' ,Test.stacticC)
-console.log(test.a)
-test.getName();
-test.getAge();
-console.log(test.getType())
-
-console.log('                                               ')
-
-
-function Person(name, age) {
-    var pri = 'pri';
-    this.name = name;
-    this.age = age;
-    this.getName = function () {
-        console.log(this.name)
+    A.prototype.getName = function () {
+      console.log(this.name);
     }
-}
 
-Person.prototype.getAge = function () {
-    console.log(this.age)
-}
+    // let a = new A('name1');
+    // let _a = factory(A, 'name2')
+    // console.log(a, _a)
 
-Person.description = 'This is Person description!'
+    // a.getName();
+    // _a.getName();
 
-let person = new Person('person', '17');
+    let obj = {
+      name: null
+    }
 
-console.log(person)
-console.log(Object.keys(person))
-console.log(Object.getOwnPropertyNames(person))
-console.log(Object.getPrototypeOf(person))
-for(let i in person) {
-    console.log('loop: ', i, person.hasOwnProperty(i));
-}
-console.log(person.description, '|' ,person.description)
-console.log(person.pri)
-person.getName();
-person.getAge();
+    Function.prototype._call = function (context, ...args) {
+      let ctx = context || window;
+      ctx.fn = this;
+      let res = ctx.fn(...args);
+      delete ctx.fn;
+      return res
+    }
 
+    Function.prototype._bind = function (context, ...args) {
+      let fn = this;
+      return function(...arguments) {
+        let ctx = context || window;
+        ctx.fn = fn;
+        let res = ctx.fn(...args, ...arguments);
+        delete ctx.fn;
+        return res
+      }
+    }
 
+    let target = [{a: 1}, {b: 2}, {c: [1,2,3]}];
+
+    function copyDeep(obj) {
+      const needLoop = tar => Array.isArray(tar) || (tar instanceof Object && tar.constructor === Object);
+      if(needLoop(obj)) {
+        let result = Array.isArray(obj) ? [] : {};
+        for(let i in obj){
+          if(obj.hasOwnProperty(i)) {
+              const value = obj[i]
+              result[i] = needLoop(value) ? copyDeep(value) : value;
+          }
+        }
+        return result
+      }
+      return obj
+    }
+
+    function getChild(obj) {
+      let arr = []
+      const needLoop = tar => Array.isArray(tar) || (tar instanceof Object && tar.constructor === Object);
+      if(needLoop(obj)) {
+        for(let i in obj){
+          if(obj.hasOwnProperty(i)) {
+              const value = obj[i]
+              arr = arr.concat(needLoop(value) ? getChild(value) : value)
+              console.log(value, needLoop(value), arr)
+          }
+        }
+        return arr
+      }
+      return arr.concat(obj)
+    }
+
+    // console.log('res: ', getChild(target))
+    // console.log('res: ', getChild({a: 1}))
+
+    // let test = copyDeep(target);
+    // test[0].a = 2;
+    // console.log(target, test);
+
+    // A.call(obj, 'name1')
+    // A._call(obj, 'name2')
+    // A.bind(obj, 'name3')()
+    // console.log(obj)
+
+    const fn = () => {
+      console.log(123)
+    }
+
+    function debounce(fn, limit) {
+      let timer
+      return function () {
+        timer && clearTimeout(timer);
+        timer = setTimeout(fn, limit)
+      }
+    }
+
+    function throttle(fn, limit) {
+      let timer
+      return function () {
+        if(!timer){
+          timer = setTimeout(() => {
+            fn()
+            clearTimeout(timer)
+            timer = null
+          }, limit)
+        }
+      }
+    }
+    
+    // fn()
+    // let n = throttle(fn, 2000)
+    // let nn = 0 ;
+    // let time = setInterval(() => {
+    //   console.log(nn)
+    //   nn++
+    //   if(nn > 10) return clearInterval(time)
+    //   n()
+    // }, 500)
 
     </script>
   </body>
