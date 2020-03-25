@@ -33,6 +33,30 @@
           transform: scaleY(0.5);
         }
       }
+
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        border: 1px solid red;
+        width: 300px;
+        height: 300px;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+
+      .item {
+        width: 33%;
+        height: 33%;
+        border: 1px solid yellow;
+        box-sizing: border-box;
+        text-align: center;
+        line-height: 33%;
+        transition: all .3s;
+      } 
     </style>
   </head>
   <body>
@@ -44,12 +68,42 @@
       <div class="line"></div>
     </div> -->
 
+    <div class="container">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+      <div class="item">7</div>
+      <div class="item">8</div>
+      <div class="item">9</div>
+    </div>
+
+    <button onclick="shuffle('.container', '.container .item')"></button>
+
     <script
       src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"
       integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ="
       crossorigin="anonymous"
     ></script>
     <script>
+
+      function shuffle(containerQuery, itemsQuery) {
+        console.log('ok')
+        const container = document.querySelector(containerQuery);
+        const items = document.querySelectorAll(itemsQuery);
+        console.log(container, items)
+        let origin = (Array(9).fill(0).map((v, i) => i));
+        let after = _.shuffle(origin);
+        [...items].map((v, i)=>{
+          console.log(v)
+          const index = after[i];
+          const x = items[index].offsetLeft - v.offsetLeft;
+          const y = items[index].offsetTop - v.offsetTop;
+          v.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        })
+      }
       // const arr = [
       //   0,
       //   [1],
@@ -1071,6 +1125,87 @@ function _instance(left, right) {
     //   if(nn > 10) return clearInterval(time)
     //   n()
     // }, 500)
+
+
+function Parent (name, colors) {
+  this.name = name
+  this.colors = colors
+}
+Parent.prototype.features = ['cute']
+
+function Child (name, colors) {
+  this.sex = 'boy'
+  Parent.apply(this, [name, colors])
+}
+Child.prototype = new Parent()
+Child.prototype.constructor = Child
+
+var child1 = new Child('child1', ['white'])
+// child1.colors.push('yellow')
+// child1.features.push('sunshine')
+// var child2 = new Child('child2', ['black'])
+
+// console.log(Object.create(Parent.prototype), '==', new Parent('name', ['red']), '===', child1)
+
+
+// function test() {
+
+//   for(let i = 0; i <5; i++) {
+//     console.log('i: ', i, '========');
+
+//     for(let n = 0; n < 5; n++) {
+//       if(n === 2) return 'test'
+//       console.log('n: ', n);
+//     }
+//   }
+
+// }
+
+class Big {
+  constructor() {
+    this.name = 'parent'
+    this.age = 18
+  }
+
+  getName() {
+    console.log(this.name, '=')
+  }
+}
+
+Big.description = 'This is Big!';
+
+class Test extends Big {
+  constructor() {
+    super()
+    this.name = 'Test';
+    // console.log(super)
+    // super.getName()
+    // console.log(super.description)
+  }
+
+  static test() {
+    console.log(super.age)
+  }
+}
+
+let test = new Test()
+
+Test.test()
+
+// console.log(test())
+
+
+// console.log(child1)
+// console.log(child2)
+// console.log(Child.prototype)
+
+// console.log(child1 instanceof Child)
+// console.log(child1 instanceof Parent)
+
+// console.log(_instance(child1, Child))
+// console.log(_instance(child1, Parent))
+// console.log(new Parent())
+// console.log(child1.__proto__, Parent.prototype)
 
     </script>
   </body>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        border: 1px solid red;
+        width: 300px;
+        height: 300px;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+
+      .item {
+        width: 33%;
+        height: 33%;
+        border: 1px solid yellow;
+        box-sizing: border-box;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all .3s ease-in;
+      } 
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+      <div class="item">7</div>
+      <div class="item">8</div>
+      <div class="item">9</div>
+    </div>
+
+    <button onclick="shuffle('.container', '.container .item')">shuffle</button>
+
+
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"
+      integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+
+      function shuffle(containerQuery, itemsQuery) {
+        console.log('ok')
+        const container = document.querySelector(containerQuery);
+        const items = document.querySelectorAll(itemsQuery);
+        console.log(container, items)
+        let origin = (Array(9).fill(0).map((v, i) => i));
+        let after = _.shuffle(origin);
+        [...items].map((v, i)=>{
+          console.log(v)
+          const index = after[i];
+          const x = items[index].offsetLeft - v.offsetLeft;
+          const y = items[index].offsetTop - v.offsetTop;
+          v.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        })
+      }
+
+    </script>
+  </body>
+</html>

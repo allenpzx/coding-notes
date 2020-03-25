@@ -5,6 +5,8 @@
  * 在class中使用=来定义一个属性和方法，效果与第二点相同，会被定义到实例上 (会定义到实例对象上)
  * 在class中直接定义一个方法，会被添加到原型对象prototype上
  * constructor中定义的相同名称的属性和方法会覆盖在class里定义的
+ * 在子类的普通函数中super对象指向父类的原型对象
+ * 在子类的静态方法中super对象指向父类
  */
 
 class Test {
@@ -18,12 +20,14 @@ class Test {
 
     static stacticC = 123;
 
-    getName = function () {
-        console.log(this.name)
+    getName = function (name) {
+        console.log(this.name, name)
     }
 
-    getAge () {
-        console.log(this.age)
+    getAge (some) {
+        // console.log('getAge')
+        console.log(this.age, some)
+        return some
     }
 }
 
@@ -43,6 +47,27 @@ console.log(test.stacticC, '|' ,Test.stacticC)
 console.log(test.a)
 test.getName();
 test.getAge();
+
+class Child extends Test {
+    constructor(name, age) {
+        super(name, age)
+        this.age = age
+        console.log('[constructor]: ', super.description, super.getAge('========'))
+    }
+
+    common() {
+        console.log('[common]: ', super.description, super.getAge('---------'), super.b)
+    }
+
+    static sjingtai() {
+        console.log('[jingtai]: ', super.description)
+    }
+}
+
+let child = new Child('child', 17);
+
+child.common();
+Child.sjingtai();
 
 console.log('                                               ')
 
