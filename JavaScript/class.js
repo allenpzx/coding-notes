@@ -7,6 +7,7 @@
  * constructor中定义的相同名称的属性和方法会覆盖在class里定义的
  * 在子类的普通函数中super对象指向父类的原型对象
  * 在子类的静态方法中super对象指向父类
+ * 通过super调用父类的方法时，super会绑定子类的this
  */
 
 class Test {
@@ -24,12 +25,14 @@ class Test {
         console.log(this.name, name)
     }
 
-    getAge (some) {
+    getAge () {
         // console.log('getAge')
-        console.log(this.age, some)
-        return some
+        console.log(this.age)
+        return this.age
     }
 }
+
+// Test.prototype.age = 100;
 
 Test.description = 'This is Test description!';
 
@@ -51,12 +54,12 @@ test.getAge();
 class Child extends Test {
     constructor(name, age) {
         super(name, age)
-        this.age = age
-        console.log('[constructor]: ', super.description, super.getAge('========'))
+        this.age = age - 10
+        console.log('[constructor]: ', super.description, super.getAge(), super.b)
     }
 
     common() {
-        console.log('[common]: ', super.description, super.getAge('---------'), super.b)
+        console.log('[common]: ', super.description, super.getAge(), super.b)
     }
 
     static sjingtai() {
