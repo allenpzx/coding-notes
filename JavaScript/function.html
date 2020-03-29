@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      /**
+       * 构造函数的返回值
+       * 1.没有返回值则按照其他语言一样返回实例化对象。
+       * 2.有返回值则检查其返回值是否为引用类型。如果是非引用类型，如基本类型（String,Number,Boolean,Null,
+       * Undefined）则与无返回值相同，实际返回其实例化对象。
+       * 3.若返回值是引用类型，则实际返回值为这个引用类型。
+       *
+       * 运算符优先级: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
+       * 
+       * 函数声明 和 函数表达式
+       * Javascript中函数声明和函数表达式是存在区别的，函数声明在JS解析时进行函数提升，因此在同一个作用域内，不
+       * 管函数声明在哪里定义，该函数都可以进行调用。而函数表达式的值是在JS运行时确定，并且在表达式赋值完成后，该
+       * 函数才能调用。
+       */
+
+      //   function Foo() {
+      //     getName = function() {
+      //       console.log(1);
+      //     };
+      //     return this;
+      //   }
+      //   Foo.getName = function() {
+      //     console.log(2);
+      //   };
+      //   Foo.prototype.getName = function() {
+      //     console.log(3);
+      //   };
+      //   var getName = function() {
+      //     console.log(4);
+      //   };
+      //   function getName() {
+      //     console.log(5);
+      //   }
+
+      //   Foo.getName(); // 2
+      //   getName(); // 4
+      //   Foo().getName(); // 1
+      //   getName(); // 1
+      //   new Foo.getName(); // 2  new (Foo.getName)()
+      //   new Foo().getName(); // 3 (new Foo()).getName()
+      //   new new Foo().getName(); // new ((new Foo()).getName)() // 3
+
+      function Foo() {
+        this.getName = function() {
+          console.log(3);
+          return {
+            getName: getName
+          };
+        };
+        getName = function() {
+          console.log(1);
+        };
+        return this;
+      }
+
+      Foo.getName = function() {
+        console.log(2);
+      };
+      Foo.prototype.getName = function() {
+        console.log(6);
+      };
+
+      var getName = function() {
+        console.log(4);
+      };
+
+      function getName() {
+        console.log(5);
+      }
+
+      //   Foo.getName(); // 2
+      //   getName(); // 4
+      //   console.log(Foo()); // Foo {}
+      //   Foo().getName(); // 1
+      //   getName(); // 1
+      //   new Foo.getName(); // 2
+      //   new Foo().getName(); // 3
+      //   new Foo().getName().getName(); // 3 1
+      //   new new Foo().getName(); // 3
+
+    //   function factory(fn, ...args) {
+    //     let obj = {};
+    //     const res = fn.call(obj, ...args);
+    //     obj.__proto__ = fn.prototype;
+    //     return typeof res === "object" ? res : obj;
+    //   }
+    </script>
+  </body>
+</html>

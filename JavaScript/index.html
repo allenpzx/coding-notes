@@ -93,12 +93,12 @@
     ></script>
     <script>
 
-      function pop (e, num){
-        console.log('test: ', num, e)
-      }
+      // function pop (e, num){
+      //   console.log('test: ', num, e)
+      // }
 
-      let testd = {}
-      const { a } = testd;
+      // let testd = {}
+      // const { a } = testd;
       // const arr = [
       //   0,
       //   [1],
@@ -976,140 +976,140 @@
 // person.getAge();
 
 
-function _instance(left, right) {
-        while(true){
-            if(!left) return false
-            if(left.__proto__ === right.prototype) return true
-            left = left.__proto__
-        }
-    }
+// function _instance(left, right) {
+//         while(true){
+//             if(!left) return false
+//             if(left.__proto__ === right.prototype) return true
+//             left = left.__proto__
+//         }
+//     }
 
-    // console.log({} instanceof Object, _instance({}, Object))
-    // console.log([] instanceof Array, _instance([], Array))
+//     // console.log({} instanceof Object, _instance({}, Object))
+//     // console.log([] instanceof Array, _instance([], Array))
 
-    function create(proto, properties) {
-        let o = {};
-        o.__proto__ = proto;
-        properties && Object.defineProperties(o, properties);
-        return o
-    }
+//     function create(proto, properties) {
+//         let o = {};
+//         o.__proto__ = proto;
+//         properties && Object.defineProperties(o, properties);
+//         return o
+//     }
 
-    // console.log(Object.create({}), create({}))
-    // console.log(Object.create(null), create(null))
+//     // console.log(Object.create({}), create({}))
+//     // console.log(Object.create(null), create(null))
 
-    function factory(fn, ...args) {
-      let o = {};
-      o.__proto__ = fn.prototype;
-      let res = fn.apply(o, args)
-      return res instanceof Object ? res : o
-    }
+//     function factory(fn, ...args) {
+//       let o = {};
+//       o.__proto__ = fn.prototype;
+//       let res = fn.apply(o, args)
+//       return res instanceof Object ? res : o
+//     }
 
-    function A(name) {
-      this.name = name;
-    }
-    A.prototype.getName = function () {
-      console.log(this.name);
-    }
+//     function A(name) {
+//       this.name = name;
+//     }
+//     A.prototype.getName = function () {
+//       console.log(this.name);
+//     }
 
-    // let a = new A('name1');
-    // let _a = factory(A, 'name2')
-    // console.log(a, _a)
+//     // let a = new A('name1');
+//     // let _a = factory(A, 'name2')
+//     // console.log(a, _a)
 
-    // a.getName();
-    // _a.getName();
+//     // a.getName();
+//     // _a.getName();
 
-    let obj = {
-      name: null
-    }
+//     let obj = {
+//       name: null
+//     }
 
-    Function.prototype._call = function (context, ...args) {
-      let ctx = context || window;
-      ctx.fn = this;
-      let res = ctx.fn(...args);
-      delete ctx.fn;
-      return res
-    }
+//     Function.prototype._call = function (context, ...args) {
+//       let ctx = context || window;
+//       ctx.fn = this;
+//       let res = ctx.fn(...args);
+//       delete ctx.fn;
+//       return res
+//     }
 
-    Function.prototype._bind = function (context, ...args) {
-      let fn = this;
-      return function(...arguments) {
-        let ctx = context || window;
-        ctx.fn = fn;
-        let res = ctx.fn(...args, ...arguments);
-        delete ctx.fn;
-        return res
-      }
-    }
+//     Function.prototype._bind = function (context, ...args) {
+//       let fn = this;
+//       return function(...arguments) {
+//         let ctx = context || window;
+//         ctx.fn = fn;
+//         let res = ctx.fn(...args, ...arguments);
+//         delete ctx.fn;
+//         return res
+//       }
+//     }
 
-    let target = [{a: 1}, {b: 2}, {c: [1,2,3]}];
+//     let target = [{a: 1}, {b: 2}, {c: [1,2,3]}];
 
-    function copyDeep(obj) {
-      const needLoop = tar => Array.isArray(tar) || (tar instanceof Object && tar.constructor === Object);
-      if(needLoop(obj)) {
-        let result = Array.isArray(obj) ? [] : {};
-        for(let i in obj){
-          if(obj.hasOwnProperty(i)) {
-              const value = obj[i]
-              result[i] = needLoop(value) ? copyDeep(value) : value;
-          }
-        }
-        return result
-      }
-      return obj
-    }
+//     function copyDeep(obj) {
+//       const needLoop = tar => Array.isArray(tar) || (tar instanceof Object && tar.constructor === Object);
+//       if(needLoop(obj)) {
+//         let result = Array.isArray(obj) ? [] : {};
+//         for(let i in obj){
+//           if(obj.hasOwnProperty(i)) {
+//               const value = obj[i]
+//               result[i] = needLoop(value) ? copyDeep(value) : value;
+//           }
+//         }
+//         return result
+//       }
+//       return obj
+//     }
 
-    function getChild(obj) {
-      let arr = []
-      const needLoop = tar => Array.isArray(tar) || (tar instanceof Object && tar.constructor === Object);
-      if(needLoop(obj)) {
-        for(let i in obj){
-          if(obj.hasOwnProperty(i)) {
-              const value = obj[i]
-              arr = arr.concat(needLoop(value) ? getChild(value) : value)
-              console.log(value, needLoop(value), arr)
-          }
-        }
-        return arr
-      }
-      return arr.concat(obj)
-    }
+//     function getChild(obj) {
+//       let arr = []
+//       const needLoop = tar => Array.isArray(tar) || (tar instanceof Object && tar.constructor === Object);
+//       if(needLoop(obj)) {
+//         for(let i in obj){
+//           if(obj.hasOwnProperty(i)) {
+//               const value = obj[i]
+//               arr = arr.concat(needLoop(value) ? getChild(value) : value)
+//               console.log(value, needLoop(value), arr)
+//           }
+//         }
+//         return arr
+//       }
+//       return arr.concat(obj)
+//     }
 
-    // console.log('res: ', getChild(target))
-    // console.log('res: ', getChild({a: 1}))
+//     // console.log('res: ', getChild(target))
+//     // console.log('res: ', getChild({a: 1}))
 
-    // let test = copyDeep(target);
-    // test[0].a = 2;
-    // console.log(target, test);
+//     // let test = copyDeep(target);
+//     // test[0].a = 2;
+//     // console.log(target, test);
 
-    // A.call(obj, 'name1')
-    // A._call(obj, 'name2')
-    // A.bind(obj, 'name3')()
-    // console.log(obj)
+//     // A.call(obj, 'name1')
+//     // A._call(obj, 'name2')
+//     // A.bind(obj, 'name3')()
+//     // console.log(obj)
 
-    const fn = () => {
-      console.log(123)
-    }
+//     const fn = () => {
+//       console.log(123)
+//     }
 
-    function debounce(fn, limit) {
-      let timer
-      return function () {
-        timer && clearTimeout(timer);
-        timer = setTimeout(fn, limit)
-      }
-    }
+//     function debounce(fn, limit) {
+//       let timer
+//       return function () {
+//         timer && clearTimeout(timer);
+//         timer = setTimeout(fn, limit)
+//       }
+//     }
 
-    function throttle(fn, limit) {
-      let timer
-      return function () {
-        if(!timer){
-          timer = setTimeout(() => {
-            fn()
-            clearTimeout(timer)
-            timer = null
-          }, limit)
-        }
-      }
-    }
+//     function throttle(fn, limit) {
+//       let timer
+//       return function () {
+//         if(!timer){
+//           timer = setTimeout(() => {
+//             fn()
+//             clearTimeout(timer)
+//             timer = null
+//           }, limit)
+//         }
+//       }
+//     }
     
     // fn()
     // let n = throttle(fn, 2000)
@@ -1122,20 +1122,20 @@ function _instance(left, right) {
     // }, 500)
 
 
-function Parent (name, colors) {
-  this.name = name
-  this.colors = colors
-}
-Parent.prototype.features = ['cute']
+// function Parent (name, colors) {
+//   this.name = name
+//   this.colors = colors
+// }
+// Parent.prototype.features = ['cute']
 
-function Child (name, colors) {
-  this.sex = 'boy'
-  Parent.apply(this, [name, colors])
-}
-Child.prototype = new Parent()
-Child.prototype.constructor = Child
+// function Child (name, colors) {
+//   this.sex = 'boy'
+//   Parent.apply(this, [name, colors])
+// }
+// Child.prototype = new Parent()
+// Child.prototype.constructor = Child
 
-var child1 = new Child('child1', ['white'])
+// var child1 = new Child('child1', ['white'])
 // child1.colors.push('yellow')
 // child1.features.push('sunshine')
 // var child2 = new Child('child2', ['black'])
@@ -1156,36 +1156,36 @@ var child1 = new Child('child1', ['white'])
 
 // }
 
-class Big {
-  constructor() {
-    this.name = 'parent'
-    this.age = 18
-  }
+// class Big {
+//   constructor() {
+//     this.name = 'parent'
+//     this.age = 18
+//   }
 
-  getName() {
-    console.log(this.name, '=')
-  }
-}
+//   getName() {
+//     console.log(this.name, '=')
+//   }
+// }
 
-Big.description = 'This is Big!';
+// Big.description = 'This is Big!';
 
-class Test extends Big {
-  constructor() {
-    super()
-    this.name = 'Test';
-    // console.log(super)
-    // super.getName()
-    // console.log(super.description)
-  }
+// class Test extends Big {
+//   constructor() {
+//     super()
+//     this.name = 'Test';
+//     // console.log(super)
+//     // super.getName()
+//     // console.log(super.description)
+//   }
 
-  static test() {
-    console.log(super.age)
-  }
-}
+//   static test() {
+//     console.log(super.age)
+//   }
+// }
 
-let test = new Test()
+// let test = new Test()
 
-Test.test()
+// Test.test()
 
 // console.log(test())
 
@@ -1200,7 +1200,38 @@ Test.test()
 // console.log(_instance(child1, Child))
 // console.log(_instance(child1, Parent))
 // console.log(new Parent())
+
 // console.log(child1.__proto__, Parent.prototype)
+
+  // function _instanceOf(left, right){
+  //   while(left) {
+  //     if(left.__proto__ === right.prototype) return true
+  //     left = left.__proto__
+  //   }
+  //   return false
+  // }
+
+    function Foo() {
+      this.name = 'Foo';
+
+      // return function getName () {
+      //   this.name = 'getName'
+      // }
+    }
+
+    Foo.getName = function () {
+      console.log('static')
+    }
+
+    Foo.prototype.getName = function () {
+      console.log('prototype');
+    }
+
+
+    // new Foo.getName()
+    // new Foo().getName()
+    // const a = new Foo();
+    console.log(new Foo().getName())
 
     </script>
   </body>

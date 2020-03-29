@@ -11,8 +11,8 @@ function _instanceof(left, right) {
 function factory(fn, ...args) {
   let o = {};
   o.__proto__ = fn.prototype;
-  fn.call(o, ...args);
-  return o;
+  const res = fn.call(o, ...args);
+  return typeof res === 'object' ? res : o;
 }
 
 // Object.create
