@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .out {
+        width: 500px;
+        height: 500px;
+        border: 1px solid red;
+      }
+
+      .middle {
+        width: 400px;
+        height: 400px;
+        border: 1px solid orange;
+      }
+
+      .in {
+        width: 300px;
+        height: 300px;
+        border: 1px solid blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="out">
+      <div class="middle">
+        <div class="in">
+            <a href="">try</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const out = document.querySelector(".out");
+      const middle = document.querySelector(".middle");
+      const inside = document.querySelector(".in");
+      const a = document.querySelector('a');
+      const useCapture = false;
+
+      out.addEventListener("click", function() {
+        console.log("out");
+      }, useCapture);
+      middle.addEventListener("click", function() {
+        console.log("middle");
+      }, useCapture);
+      inside.addEventListener("click", function() {
+        console.log("inside");
+      }, useCapture);
+      
+      a.addEventListener('click', function (e) {
+        e.preventDefault()
+        e.stopPropagation() // stoped when useCapture === false
+      })
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1 id="title">default</h1>
+    <h3 id="status">default</h3>
+    <br>
+    <p>Please toggle wifi to check it.</p>
+    <script>
+        window.addEventListener('load', function () {
+            const h1 = document.querySelector('#title');
+            const h3 = document.querySelector('#status');
+            window.addEventListener('online', function () {
+                h1.textContent = 'ONLINE';
+                h3.textContent = navigator.onLine
+            })
+            window.addEventListener('offline', function () {
+                h1.textContent = 'OFFLINE';
+                h3.textContent = navigator.onLine
+            })
+        })
+    </script>
+</body>
+</html>
