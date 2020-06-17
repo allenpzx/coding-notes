@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .toggle {
+        width: 90px;
+        height: 50px;
+        position: relative;
+        border-radius: 25px;
+        cursor: pointer;
+        display: inline-block;
+        overflow: hidden;
+      }
+
+      .toggle-checkbox {
+        position: absolute;
+        visibility: hidden;
+      }
+
+      .btn {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        width: 50px;
+        height: 50px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 2px 1px 1px #ccc;
+        left: 0;
+      }
+
+      .bg {
+        content: '';
+        display: block;
+        width: 90px;
+        height: 50px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: #ccc;
+        transition: all .3s;
+        z-index: -1;
+      }
+
+      .toggle,
+      .btn,
+      .bg {
+        transition: all 0.3s;
+      }
+
+      .toggle-checkbox:checked + .btn {
+        left: 40px;
+      }
+      .toggle-checkbox:checked ~ .bg {
+        background-color: #56c080;
+      }
+    </style>
+  </head>
+  <body>
+    <label class="toggle" for="foo">
+      <input type="checkbox" id="foo" name="foo" class="toggle-checkbox" />
+      <div class="btn"></div>
+      <div class="bg"></div>
+    </label>
+  </body>
+</html>
