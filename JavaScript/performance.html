@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background: #f2db77;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const perfObserver = new PerformanceObserver((entryList) => {
+        console.log(...entryList.getEntries());
+      });
+      perfObserver.observe({ entryTypes: ["paint"] });
+    </script>
+    <script>
+      setTimeout(() => {
+        const elH1 = document.createElement("H1");
+        elH1.textContent = "First (Contentful) Paint";
+        document.body.append(elH1);
+      }, 600);
+    </script>
+  </body>
+</html>
