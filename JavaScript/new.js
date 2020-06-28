@@ -2,7 +2,7 @@ function factory(fn, ...args) {
     let o = {};
     o.__proto__ = fn.prototype;
     const res = fn.call(o, ...args);
-    return (typeof res === 'obj' || typeof res === 'function') ? res : o
+    return (typeof res === 'object' || typeof res === 'function') ? res : o
   }
   
   function Person(firtName, lastName) {
