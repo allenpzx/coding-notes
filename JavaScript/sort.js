@@ -1,4 +1,5 @@
 let list = [3, 5, 15, 38, 36, 26, 27, 2, 4, 44, 46, 47, 48, 50];
+const arr = [1, 20, 10, 30, 22, 11, 55, 24, 31, 88, 12, 100, 50];
 
 function bubbleSort(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
@@ -59,3 +60,35 @@ console.log("result: ", insertionSortResult);
 console.timeEnd("insertionSort");
 console.log("                                             ");
 
+function quickSort(arr, left, right) {
+
+  const partition = (arr, left, right) => {
+    const pivot = arr[left];
+    while (left < right) {
+      while (left < right && arr[right] > pivot) {
+        --right;
+      }
+      arr[left] = arr[right];
+      while (left < right && arr[left] <= pivot) {
+        ++left;
+      }
+      arr[right] = arr[left];
+    }
+    // left === right;
+    arr[left] = pivot;
+    return left;
+  };
+
+  if (left < right) {
+    const partitionIndex = partition(arr, left, right);
+    quickSort(arr, left, partitionIndex - 1);
+    quickSort(arr, partitionIndex + 1, right);
+  }
+  return arr;
+}
+
+console.time("quickSort");
+const quickSortResult = quickSort(list.slice(), 0, list.slice().length - 1);
+console.log("result: ", quickSortResult);
+console.timeEnd("quickSort");
+console.log("                                             ");
