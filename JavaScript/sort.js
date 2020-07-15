@@ -60,35 +60,59 @@ console.log("result: ", insertionSortResult);
 console.timeEnd("insertionSort");
 console.log("                                             ");
 
-function quickSort(arr, left, right) {
-
-  const partition = (arr, left, right) => {
-    const pivot = arr[left];
-    while (left < right) {
-      while (left < right && arr[right] > pivot) {
-        --right;
+function quickSort(nums) {
+  const partition = (arr, l, r) => {
+    const pivot = arr[l];
+    while (l < r) {
+      while (l < r && arr[r] > pivot) {
+        r--;
       }
-      arr[left] = arr[right];
-      while (left < right && arr[left] <= pivot) {
-        ++left;
+      arr[l] = arr[r]
+      while (l < r && arr[l] <= pivot) {
+        l++;
       }
-      arr[right] = arr[left];
+      arr[r] = arr[l]
     }
-    // left === right;
-    arr[left] = pivot;
-    return left;
+    arr[l] = pivot;
+    return l;
   };
-
-  if (left < right) {
-    const partitionIndex = partition(arr, left, right);
-    quickSort(arr, left, partitionIndex - 1);
-    quickSort(arr, partitionIndex + 1, right);
-  }
-  return arr;
+  const recursive = (arr, l, r) => {
+    if (l < r) {
+      const pivot = partition(arr, l, r);
+      recursive(arr, l, pivot - 1);
+      recursive(arr, pivot + 1, r);
+    }
+  };
+  recursive(nums, 0, nums.length - 1);
+  return nums;
 }
 
 console.time("quickSort");
-const quickSortResult = quickSort(list.slice(), 0, list.slice().length - 1);
+const quickSortResult = quickSort(list.slice());
 console.log("result: ", quickSortResult);
 console.timeEnd("quickSort");
+console.log("                                             ");
+
+function shellSort(nums) {
+  let gap = 1;
+  while(gap < nums.length / 3) {
+    gap = gap * 3 + 1
+  }
+  for(gap; gap > 0; gap = Math.floor(gap / 3)) {
+    for(let i = gap; i < nums.length; i++) {
+      let index = i - gap;
+      const current = nums[i];
+      for(index; index >= 0 && nums[index] > current; index -= gap) {
+        nums[index + gap] = nums[index];
+      }
+      nums[index + gap] = current
+    }
+  }
+  return nums
+}
+
+console.time("shellSort");
+const shellSortResult = shellSort(list.slice());
+console.log("result: ", shellSortResult);
+console.timeEnd("shellSort");
 console.log("                                             ");
