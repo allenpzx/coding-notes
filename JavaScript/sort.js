@@ -67,11 +67,11 @@ function quickSort(nums) {
       while (l < r && arr[r] > pivot) {
         r--;
       }
-      arr[l] = arr[r]
+      arr[l] = arr[r];
       while (l < r && arr[l] <= pivot) {
         l++;
       }
-      arr[r] = arr[l]
+      arr[r] = arr[l];
     }
     arr[l] = pivot;
     return l;
@@ -95,24 +95,70 @@ console.log("                                             ");
 
 function shellSort(nums) {
   let gap = 1;
-  while(gap < nums.length / 3) {
-    gap = gap * 3 + 1
+  while (gap < nums.length / 3) {
+    gap = gap * 3 + 1;
   }
-  for(gap; gap > 0; gap = Math.floor(gap / 3)) {
-    for(let i = gap; i < nums.length; i++) {
+  for (gap; gap > 0; gap = Math.floor(gap / 3)) {
+    for (let i = gap; i < nums.length; i++) {
       let index = i - gap;
       const current = nums[i];
-      for(index; index >= 0 && nums[index] > current; index -= gap) {
+      for (index; index >= 0 && nums[index] > current; index -= gap) {
         nums[index + gap] = nums[index];
       }
-      nums[index + gap] = current
+      nums[index + gap] = current;
     }
   }
-  return nums
+  return nums;
 }
 
 console.time("shellSort");
 const shellSortResult = shellSort(list.slice());
 console.log("result: ", shellSortResult);
 console.timeEnd("shellSort");
+console.log("                                             ");
+
+function heapSort(arr) {
+  function swap(arr, l, r) {
+    const temp = arr[r];
+    arr[r] = arr[l];
+    arr[l] = temp;
+  }
+  function heaplify(arr, n, i) {
+    let c1 = i * 2 + 1;       // left child node
+    let c2 = i * 2 + 2;       // right child node
+    let max = i;
+    if (i >= n) return;
+    if (c1 < n && arr[c1] > arr[max]) {
+      max = c1;
+    }
+    if (c2 < n && arr[c2] > arr[max]) {
+      max = c2;
+    }
+    if (max !== i) {
+      swap(arr, max, i);      // make the max index on top
+      heaplify(arr, n, max);  // deeply search in max index
+    }
+  }
+  function build_heap(tree) {
+    const lastNode = tree.length - 1;
+    const lastNodeParent = Math.floor((lastNode - 1) / 2);
+    for (let i = lastNodeParent; i >= 0; i--) {
+      heaplify(tree, tree.length, i);
+    }
+  }
+  function sort_heap(tree) {
+    build_heap(tree);
+    for (let i = tree.length - 1; i >= 0; i--) {
+      swap(tree, 0, i);
+      heaplify(tree, i, 0);
+    }
+  }
+  sort_heap(arr);
+  return arr;
+}
+
+console.time("heapSort");
+const heapSortResult = heapSort(list.slice());
+console.log("result: ", heapSortResult);
+console.timeEnd("heapSort");
 console.log("                                             ");

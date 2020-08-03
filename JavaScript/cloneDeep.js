@@ -20,6 +20,26 @@ function cloneDeep(obj, memo = new WeakMap()) {
   return obj;
 }
 
+// function copyDeeply(obj, memo = new WeakMap()) {
+//   if (memo.has(obj)) return memo.get(obj);
+//   const isRefrenceType = (tar) => tar && typeof tar === "object";
+//   if (isRefrenceType(obj)) {
+//     let result = new obj.constructor();
+//     if (obj.constructor === RegExp) {
+//       return new RegExp(obj);
+//     }
+//     for (let i in obj) {
+//       if (obj.hasOwnProperty(i)) {
+//         const val = obj[i];
+//         result[i] = isRefrenceType(val) ? copyDeeply(val) : val;
+//       }
+//     }
+//     memo.set(obj, result);
+//     return result;
+//   }
+//   return obj;
+// }
+
 const target = {
   field1: 1,
   field2: undefined,
